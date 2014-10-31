@@ -311,19 +311,23 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
             currentUserConnections[currentUserConnections.length - 2] = currentUserConnections.pop();
         } // end if
 
-
     } // end onopen()
 
 
     // On getting local or remote media stream
-    newConnection.onstream = function (e) {
+    newConnection.onstream = function(e) {
         console.log(e);
 
         if(e.type == "local") {
-
+            document.getElementById("local-media").appendChild(e.mediaElement);
         } else {
-
+            document.getElementById("remote-media").appendChild(e.mediaElement);
         } // end if/else
+    };
+
+    newConnection.onstreamended = function(e) {
+        // Remove relevant stream
+        e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
 
     newConnection.onMediaFile = function(e) {
@@ -348,6 +352,27 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
 
     return newConnection;
 } // end CreateNewConnection()
+
+
+document.getElementById("start-video").onclick = function() {
+    var videoButton = document.getElementById("start-video");
+
+    if(videoButton.value == "Attach Video Stream") {
+        currentUserConnections[0].addStream({
+            audio: true,
+            video: true
+        });
+
+        videoButton.value = "Detach Video Stream";
+    } else {
+        currentUserConnections[0].removeStream({
+            screen: true,
+            audio: true
+        });
+
+        videoButton.value = "Attach Video Stream";
+    } // end else/if
+};
 
 
 // Text chat input onkeydown event
@@ -375,7 +400,7 @@ document.getElementById("webm-file").onchange = function() {
 };
 
 // Connect to another user on button click!
-document.getElementById("connect-to-user").onclick = function () {
+document.getElementById("connect-to-user").onclick = function() {
     var userIDInput = document.getElementById('userID-input');
     var userIDToConnect = userIDInput.value;
 
