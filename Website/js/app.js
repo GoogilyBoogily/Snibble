@@ -33,7 +33,7 @@ function GenerateUserID() {
 
     // TODO: Maybe? Add in checking for if the userID we want to generate is already taken
 
-    for(var i = 0; i < 24; i++) {
+    for(var i = 0; i < 6; i++) {
         text += charSet.charAt(Math.floor(Math.random() * charSet.length));
     } // end for
 
@@ -64,6 +64,14 @@ function IsCurrentlyConnected(userIDToConnectTo) {
 function ConnectToUser(userIDToConnectTo) {
     // Check if we're already connected to the user we want to connect to
     if (!IsCurrentlyConnected(userIDToConnectTo).connected) {
+        //--------
+        // TODO: Connect to the user we want to connect to by connecting to their channel, and use our userID
+        //       as the sessionid. This should work perfectly for a two user connection, but breaks down when
+        //         adding a third user.
+        //         A way to make this work is by simply checking where we're connected to that user, and send
+        //         a message through a chat that way.
+        //--------
+
         // Add a new connection onto the current user's connection array
         var newConIndex = currentUserConnections.length;
 
@@ -83,48 +91,9 @@ function ConnectToUser(userIDToConnectTo) {
         console.log(currentUserConnections[newConIndex]);
     } else {
         // Already connected to the user we want to connect to
-
+        return;
     } // end if/else
 } // end ConnectToUser()
-
-
-// Handle how to get streams
-
-
-// same code can be used for participants
-// (it is optional)
-/*
-moderator.onstreamid = function(event) {
-    // got a clue of incoming remote stream
-    // didn't get remote stream yet
-
-    var incoming_stream_id = event.streamid;
-
-    YOUR_PREVIEW_IMAGE.show();
-
-    // or
-    YOUR_PREVIEW_VIDEO.show();
-};
-
-// same code can be used for participants
-// it is useful
-moderator.onstream = function(event) {
-    // got local or remote stream
-    // if(event.type == 'local')  {}
-    // if(event.type == 'remote') {}
-
-    document.body.appendChild(event.mediaElement);
-
-    // or YOUR_VIDEO.src = event.blobURL;
-    // or YOUR_VIDEO.src = URL.createObjectURL(event.stream);
-};
-
-// same code can be used for participants
-// it is useful but optional
-moderator.onstreamended = function(event) {
-    event.mediaElement.parentNode.removeChild(event.mediaElement);
-};
-*/
 
 // Create and return the current user's home connection
 function CreateHomeConnection() {
@@ -334,6 +303,7 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         console.log(e);
         // e.mediaElement (it is video-element)
         // e.userid
+        console.log(newConnection.preRecordedMedias);
 
         document.body.appendChild(e.mediaElement);
     };
@@ -354,6 +324,42 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
 } // end CreateNewConnection()
 
 
+// Handle how to get streams
+
+// same code can be used for participants
+// (it is optional)
+/*
+moderator.onstreamid = function(event) {
+    // got a clue of incoming remote stream
+    // didn't get remote stream yet
+
+    var incoming_stream_id = event.streamid;
+
+    YOUR_PREVIEW_IMAGE.show();
+
+    // or
+    YOUR_PREVIEW_VIDEO.show();
+};
+
+// same code can be used for participants
+// it is useful
+moderator.onstream = function(event) {
+    // got local or remote stream
+    // if(event.type == 'local')  {}
+    // if(event.type == 'remote') {}
+
+    document.body.appendChild(event.mediaElement);
+
+    // or YOUR_VIDEO.src = event.blobURL;
+    // or YOUR_VIDEO.src = URL.createObjectURL(event.stream);
+};
+
+// same code can be used for participants
+// it is useful but optional
+moderator.onstreamended = function(event) {
+    event.mediaElement.parentNode.removeChild(event.mediaElement);
+};
+*/
 document.getElementById("start-video").onclick = function() {
     var videoButton = document.getElementById("start-video");
 
@@ -396,7 +402,7 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
 
 
 document.getElementById("webm-file").onchange = function() {
-    currentUserConnections[0].connectionObject.shareMediaFile(this.files[0]);
+    currentUserConnections[0].shareMediaFile(this.files[0]);
 };
 
 // Connect to another user on button click!

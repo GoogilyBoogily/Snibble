@@ -1,40 +1,4 @@
-// Last time updated at Oct 13, 2014, 08:32:23
-
-// Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
-// Another simple demo: http://jsfiddle.net/zar6fg60/
-
-// Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
-
-// Muaz Khan     - www.MuazKhan.com
-// MIT License   - www.WebRTC-Experiment.com/licence
-// Documentation - www.RTCMultiConnection.org/docs
-// FAQ           - www.RTCMultiConnection.org/FAQ
-// Changes log   - www.RTCMultiConnection.org/changes-log/
-// Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
-
-// _________________________
-// RTCMultiConnection-v2.2.1
-
-/* issues/features need to be fixed & implemented:
-
--. v2.0.* changes-log here: http://www.rtcmulticonnection.org/changes-log/#v2.2
--. trello: https://trello.com/b/8bhi1G6n/rtcmulticonnection 
-
--. v2.2.1 breaking updates:
---. connection.stats.sessions is removed; use connection.sessionDescriptions instead.
---. connection.stats.numberOfSessions is removed; use connection.numberOfSessions instead.
---. connection.stats.numberOfConnectedUsers is removed; use connection.numberOfConnectedUsers instead.
---. connection.getStats and connection.stats are removed.
-*/
-
 (function() {
-
-    // RMC == RTCMultiConnection
-    // usually page-URL is used as channel-id
-    // you can always override it!
-    // www.RTCMultiConnection.org/docs/channel-id/
-    window.RMCDefaultChannel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
-
     // www.RTCMultiConnection.org/docs/constructor/
     window.RTCMultiConnection = function(channel) {
         // an instance of constructor
@@ -44,7 +8,7 @@
         var rtcMultiSession;
 
         // setting default channel or channel passed through constructor
-        connection.channel = channel || RMCDefaultChannel;
+        connection.channel = channel
 
         // to allow single user to join multiple rooms;
         // you can change this property at runtime!
@@ -163,7 +127,7 @@
             // connection.send([file1, file2, file3])
             // you can share multiple files, strings or data objects using "send" method!
             if (data instanceof Array && !isNull(data[0].size) && !isNull(data[0].type)) {
-                // this mechanism can cause failure for subsequent packets/data 
+                // this mechanism can cause failure for subsequent packets/data
                 // on Firefox especially; and on chrome as well!
                 // todo: need to use setTimeout instead.
                 for (var i = 0; i < data.length; i++) {
@@ -177,7 +141,7 @@
                 if (!connection.enableFileSharing) {
                     throw '"enableFileSharing" boolean MUST be "true" to support file sharing.';
                 }
-            
+
                 if (!rtcMultiSession.fileBufferReader) {
                     initFileBufferReader(connection, function(fbr) {
                         rtcMultiSession.fileBufferReader = fbr;
@@ -672,7 +636,7 @@
                             });
                         }
 
-                        // it seems that chrome 35+ throws "DevicesNotFoundError" exception 
+                        // it seems that chrome 35+ throws "DevicesNotFoundError" exception
                         // when any of the requested media is either denied or absent
                         if (e.name && (e.name == 'PermissionDeniedError' || e.name == 'DevicesNotFoundError')) {
                             var mediaStreamError = 'Either: ';
@@ -695,7 +659,7 @@
                             connection.onMediaError(mediaStreamError);
 
                             if (isChrome && (session.audio || session.video)) {
-                                // todo: this snippet fails if user has two or more 
+                                // todo: this snippet fails if user has two or more
                                 // microphone/webcam attached.
                                 DetectRTC.load(function() {
                                     // it is possible to check presence of the microphone before using it!
@@ -1040,7 +1004,7 @@
             if (!session.extra) session.extra = {};
 
             // todo: make sure this works as expected.
-            // i.e. "onNewSession" should be fired only for 
+            // i.e. "onNewSession" should be fired only for
             // sessionid that is passed over "connect" method.
             if (connection.sessionid && session.sessionid != connection.sessionid) return;
 
@@ -1076,7 +1040,7 @@
             for (var i = 0; i < connection.localStreamids.length; i++) {
                 var streamid = connection.localStreamids[i];
                 if (connection.streams[streamid]) {
-                    // using "sockets" array to keep references of all sockets using 
+                    // using "sockets" array to keep references of all sockets using
                     // this media stream; so we can fire "onStreamEndedHandler" among all users.
                     connection.streams[streamid].sockets.push(socket);
                 }
@@ -1824,7 +1788,7 @@
                 // 2nd: must not renegotiate same media multiple times
                 // 3rd: todo: make sure that target-user has no such "renegotiated" media.
                 if (_config.userinfo.browser == 'chrome' && !_config.renegotiatedOnce) {
-                    // this code snippet is added to make sure that "previously-renegotiated" streams are also 
+                    // this code snippet is added to make sure that "previously-renegotiated" streams are also
                     // renegotiated to this new user
                     for (var rSession in connection.renegotiatedSessions) {
                         _config.renegotiatedOnce = true;
@@ -3865,7 +3829,7 @@
         // todo: need to verify all possible situations
         log('invoked getUserMedia with constraints:', toStr(hints));
 
-        // easy way to match 
+        // easy way to match
         var idInstance = JSON.stringify(hints);
 
         function streaming(stream, returnBack, streamid) {
@@ -4009,6 +3973,7 @@
                     if (!connection.preRecordedMedias[message.streamerid]) {
                         connection.shareMediaFile(null, null, message.streamerid);
                     }
+                    console.log(connection.preRecordedMedias);
                     connection.preRecordedMedias[message.streamerid].onData(message.chunk);
                 } else if (connection.autoTranslateText) {
                     e.original = e.data;
@@ -4476,7 +4441,7 @@
         if (root.type == 'remote') return;
 
         // According to issue #135, onmute/onumute must be fired for self
-        // "fakeObject" is used because we need to keep session for renegotiated streams; 
+        // "fakeObject" is used because we need to keep session for renegotiated streams;
         // and MUST pass exact session over onStreamEndedHandler/onmute/onhold/etc. events.
         var fakeObject = merge({}, root);
         fakeObject.session = session;
@@ -4549,7 +4514,7 @@
                 callback && callback();
                 return;
             }
-            
+
             navigator.getMediaDevices(function(devices) {
                 DetectRTC.MediaDevices = [];
                 devices.forEach(function(device) {
@@ -4875,7 +4840,7 @@
 
         // www.RTCMultiConnection.org/docs/snapshots/
         connection.snapshots = {};
-        
+
         // www.WebRTC-Experiment.com/demos/MediaStreamTrack.getSources.html
         connection._mediaSources = {};
 
@@ -4914,7 +4879,7 @@
         // www.RTCMultiConnection.org/docs/dontCaptureUserMedia/
         connection.dontCaptureUserMedia = false;
 
-        // this feature added to keep users privacy and 
+        // this feature added to keep users privacy and
         // make sure HTTPs pages NEVER auto capture users media
         // isChrome && location.protocol == 'https:'
         connection.preventSSLAutoAllowed = false;
@@ -4941,7 +4906,7 @@
         // resources used in RTCMultiConnection
         connection.resources = {
             RecordRTC: 'https://cdn.webrtc-experiment.com/RecordRTC.js',
-            PreRecordedMediaStreamer: 'https://cdn.webrtc-experiment.com/PreRecordedMediaStreamer.js',
+            PreRecordedMediaStreamer: 'js/PreRecordedMediaStreamer.js',
             customGetUserMediaBar: 'https://cdn.webrtc-experiment.com/navigator.customGetUserMediaBar.js',
             html2canvas: 'https://cdn.webrtc-experiment.com/screenshot.js',
             hark: 'https://cdn.webrtc-experiment.com/hark.js',
@@ -5698,14 +5663,14 @@
         connection.shareMediaFile = function(file, video, streamerid) {
             streamerid = streamerid || connection.token();
 
-            if (!PreRecordedMediaStreamer) {
+            if (!window.PreRecordedMediaStreamer) {
                 loadScript(connection.resources.PreRecordedMediaStreamer, function() {
                     connection.shareMediaFile(file, video, streamerid);
                 });
                 return streamerid;
             }
 
-            return PreRecordedMediaStreamer.shareMediaFile({
+            return window.PreRecordedMediaStreamer.shareMediaFile({
                 file: file,
                 video: video,
                 streamerid: streamerid,
