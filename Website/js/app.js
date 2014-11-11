@@ -299,6 +299,8 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
 
+    /*
+        Commenting out prerecorded media stuff because it don't work
     newConnection.onMediaFile = function(e) {
         console.log(e);
         // e.mediaElement (it is video-element)
@@ -307,6 +309,7 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
 
         document.body.appendChild(e.mediaElement);
     };
+    */
 
     newConnection.onmessage = function(message) {
         console.log(message);
@@ -365,18 +368,36 @@ document.getElementById("start-video").onclick = function() {
 
     if(videoButton.value == "Attach Video Stream") {
         currentUserConnections[0].addStream({
-            audio: true,
-            video: true
+            video: true,
+            audio: true
         });
 
         videoButton.value = "Detach Video Stream";
     } else {
         currentUserConnections[0].removeStream({
-            screen: true,
+            video: true,
             audio: true
         });
 
         videoButton.value = "Attach Video Stream";
+    } // end else/if
+};
+
+document.getElementById("start-audio").onclick = function() {
+    var videoButton = document.getElementById("start-audio");
+
+    if(videoButton.value == "Attach Audio Stream") {
+        currentUserConnections[0].addStream({
+            audio: true
+        });
+
+        videoButton.value = "Detach Audio Stream";
+    } else {
+        currentUserConnections[0].removeStream({
+            audio: true
+        });
+
+        videoButton.value = "Attach Audio Stream";
     } // end else/if
 };
 
@@ -400,10 +421,12 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
     } // end if
 };
 
-
+/*
+    More prerecorded media stuff
 document.getElementById("webm-file").onchange = function() {
     currentUserConnections[0].shareMediaFile(this.files[0]);
 };
+*/
 
 // Connect to another user on button click!
 document.getElementById("connect-to-user").onclick = function() {
