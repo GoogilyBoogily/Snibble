@@ -286,15 +286,30 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
     // On getting local or remote media stream
     newConnection.onstream = function(e) {
         console.log(e);
+        // or YOUR_VIDEO.src = e.blobURL;
 
         if(e.type == "local") {
-            document.getElementById("local-media").appendChild(e.mediaElement);
+            var localVideoStream = document.createElement("VIDEO");
+
+            localVideoStream.src = e.blobURL;
+            localVideoStream.autoplay = true;
+            localVideoStream.id = "local-video";
+
+            document.getElementById("media-container").appendChild(localVideoStream);
         } else {
-            document.getElementById("remote-media").appendChild(e.mediaElement);
+            var remoteVideoStream = document.createElement("VIDEO");
+
+            remoteVideoStream.src = e.blobURL;
+            remoteVideoStream.autoplay = true;
+            remoteVideoStream.id = "remote-video";
+
+            document.getElementById("media-container").appendChild(remoteVideoStream);
         } // end if/else
     };
 
     newConnection.onstreamended = function(e) {
+        console.log(e);
+
         // Remove relevant stream
         e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
@@ -323,46 +338,27 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         data: true
     };
 
+    // Turn off bandwidth (Dunno what this does...)
+    newConnection.bandwidth = {};
+    /*
+    connection.bandwidth = {
+        audio: 50,
+        video: 256,
+        data: 1638400,
+        screen: 300      // 300kbps
+    };
+
+    // or change them individually
+    connection.bandwidth.audio = 80;
+    connection.bandwidth.video = 2048;
+    connection.bandwidth.data  = 1638400;
+    connection.bandwidth.screen = 300;
+    */
+
     return newConnection;
 } // end CreateNewConnection()
 
 
-// Handle how to get streams
-
-// same code can be used for participants
-// (it is optional)
-/*
-moderator.onstreamid = function(event) {
-    // got a clue of incoming remote stream
-    // didn't get remote stream yet
-
-    var incoming_stream_id = event.streamid;
-
-    YOUR_PREVIEW_IMAGE.show();
-
-    // or
-    YOUR_PREVIEW_VIDEO.show();
-};
-
-// same code can be used for participants
-// it is useful
-moderator.onstream = function(event) {
-    // got local or remote stream
-    // if(event.type == 'local')  {}
-    // if(event.type == 'remote') {}
-
-    document.body.appendChild(event.mediaElement);
-
-    // or YOUR_VIDEO.src = event.blobURL;
-    // or YOUR_VIDEO.src = URL.createObjectURL(event.stream);
-};
-
-// same code can be used for participants
-// it is useful but optional
-moderator.onstreamended = function(event) {
-    event.mediaElement.parentNode.removeChild(event.mediaElement);
-};
-*/
 document.getElementById("start-video").onclick = function() {
     var videoButton = document.getElementById("start-video");
 

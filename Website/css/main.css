@@ -1,0 +1,20 @@
+div#media-container {
+    position: relative;
+    height: 375px;
+    width: 500px;
+}
+
+video#local-video {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 2;
+    height: auto;
+    width: 150px;
+}
+
+video#remote-video {
+    position: absolute;
+    height: auto;
+    width: 500px;
+}
