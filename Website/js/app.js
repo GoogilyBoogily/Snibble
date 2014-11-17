@@ -286,8 +286,8 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
     // On getting local or remote media stream
     newConnection.onstream = function(e) {
         console.log(e);
-        // or YOUR_VIDEO.src = e.blobURL;
 
+        //
         if(e.type == "local") {
             var localVideoStream = document.createElement("VIDEO");
 
@@ -429,14 +429,14 @@ document.getElementById("connect-to-user").onclick = function() {
     var userIDInput = document.getElementById('userID-input');
     var userIDToConnect = userIDInput.value;
 
-    if (userIDToConnect !== undefined) {
+    if(userIDToConnect !== undefined) {
         userIDToConnect = userIDToConnect.trim();
     } else {
         userIDToConnect = "";
     } // end if/else
 
     // If nothing is entered into the input box, do nothing
-    if (userIDToConnect == "") {
+    if(userIDToConnect == "") {
         return;
     } // end if
 
