@@ -435,8 +435,11 @@ document.getElementById("connect-to-user").onclick = function() {
         userIDToConnect = "";
     } // end if/else
 
-    // If nothing is entered into the input box, do nothing
-    if(userIDToConnect == "") {
+    // If nothing is entered into the input box or trying to connect to self, do nothing
+    if(userIDToConnect == "" || userIDToConnect == currentUserID) {
+        console.log("Either trying to connect to self, or box is empty, just returning.");
+        userIDInput.value = "";
+
         return;
     } // end if
 
