@@ -332,6 +332,9 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         // Add the chat message to the output box
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += message.userid + ": " + (message.data).replace(/[<>]/g, '') + "<br>";
+
+        // Scroll the textbox down to the newest message
+        chatOutput.scrollTop = chatOutput.scrollHeight;
     };
 
     newConnection.session = {
@@ -411,6 +414,9 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
         // Add the chat message to the output box
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += "You: " + (chatInputBox.value).replace(/[<>]/g, "") + "<br>";
+
+        // Scroll the textbox down to the newest message
+        chatOutput.scrollTop = chatOutput.scrollHeight;
 
         // Reset the chat input box
         chatInputBox.value = "";
