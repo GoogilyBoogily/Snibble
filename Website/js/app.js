@@ -75,7 +75,6 @@ function ConnectToUser(userIDToConnectTo) {
         // Add a new connection onto the current user's connection array
         var newConIndex = currentUserConnections.length;
 
-        // TODO: Remove this connection after we are sure the user we're trying to connect to enters the other channel
         currentUserConnections[newConIndex] = CreateNewConnection(userIDToConnectTo, true);
         currentUserConnections[newConIndex].connect(userIDToConnectTo);
 
@@ -357,6 +356,26 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
     connection.bandwidth.data  = 1638400;
     connection.bandwidth.screen = 300;
     */
+
+
+    newConnection.onstatechange = function(state) {
+        // state.userid == 'target-userid' || 'browser'
+        // state.extra  == 'target-user-extra-data' || {}
+        // state.name  == 'short name'
+        // state.reason == 'longer description'
+        console.log(state);
+    };
+
+    newConnection.onconnected = function (event) {
+        console.log(event);
+
+        // event.peer.addStream || event.peer.removeStream || event.peer.changeBandwidth
+        // event.peer == connection.peers[event.userid]
+
+        event.peer.getConnectionStats(function (result) {
+            console.log(result);
+        });
+    };
 
     return newConnection;
 } // end CreateNewConnection()
