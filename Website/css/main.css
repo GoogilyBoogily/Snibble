@@ -20,7 +20,7 @@ video#remote-video {
 }
 
 div#text-chat-output {
-    height: 50px;
+    height: 75px;
     width: auto;
     overflow: auto;
 }
