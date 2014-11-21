@@ -75,6 +75,7 @@ function ConnectToUser(userIDToConnectTo) {
         // Add a new connection onto the current user's connection array
         var newConIndex = currentUserConnections.length;
 
+        // TODO: Remove this connection after we are sure the user we're trying to connect to enters the other channel
         currentUserConnections[newConIndex] = CreateNewConnection(userIDToConnectTo, true);
         currentUserConnections[newConIndex].connect(userIDToConnectTo);
 
@@ -331,9 +332,6 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         // Add the chat message to the output box
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += message.userid + ": " + (message.data).replace(/[<>]/g, '') + "<br>";
-
-        // Scroll the textbox down to the newest message
-        chatOutput.scrollTop = chatOutput.scrollHeight;
     };
 
     newConnection.session = {
@@ -356,26 +354,6 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
     connection.bandwidth.data  = 1638400;
     connection.bandwidth.screen = 300;
     */
-
-
-    newConnection.onstatechange = function(state) {
-        // state.userid == 'target-userid' || 'browser'
-        // state.extra  == 'target-user-extra-data' || {}
-        // state.name  == 'short name'
-        // state.reason == 'longer description'
-        console.log(state);
-    };
-
-    newConnection.onconnected = function (event) {
-        console.log(event);
-
-        // event.peer.addStream || event.peer.removeStream || event.peer.changeBandwidth
-        // event.peer == connection.peers[event.userid]
-
-        event.peer.getConnectionStats(function (result) {
-            console.log(result);
-        });
-    };
 
     return newConnection;
 } // end CreateNewConnection()
@@ -434,9 +412,6 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += "You: " + (chatInputBox.value).replace(/[<>]/g, "") + "<br>";
 
-        // Scroll the textbox down to the newest message
-        chatOutput.scrollTop = chatOutput.scrollHeight;
-
         // Reset the chat input box
         chatInputBox.value = "";
     } // end if
@@ -460,11 +435,8 @@ document.getElementById("connect-to-user").onclick = function() {
         userIDToConnect = "";
     } // end if/else
 
-    // If nothing is entered into the input box or trying to connect to self, do nothing
-    if(userIDToConnect == "" || userIDToConnect == currentUserID) {
-        console.log("Either trying to connect to self, or box is empty, just returning.");
-        userIDInput.value = "";
-
+    // If nothing is entered into the input box, do nothing
+    if(userIDToConnect == "") {
         return;
     } // end if
 
