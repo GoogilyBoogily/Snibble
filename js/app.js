@@ -332,6 +332,9 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
         // Add the chat message to the output box
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += message.userid + ": " + (message.data).replace(/[<>]/g, '') + "<br>";
+
+        // Scroll to bottom of textbox
+        chatOutput.scrollTop = chatOutput.scrollHeight;
     };
 
     newConnection.session = {
