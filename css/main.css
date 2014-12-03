@@ -23,4 +23,7 @@ div#text-chat-output {
     height: 75px;
     width: auto;
     overflow: auto;
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
 }

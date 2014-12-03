@@ -3,14 +3,6 @@
     <head>
         <title>Snibble</title>
 
-        <!-- RTCMultiConnection script -->
-        <script type="text/javascript" src="js/RTCMultiConnection.js"></script>
-        <!-- Firebase script -->
-        <script type="text/javascript" src="https://cdn.firebase.com/js/client/2.0.3/firebase.js"></script>
-
-        <!-- Stylesheet -->
-        <link rel="stylesheet" type="text/css" href="css/main.css"></link>
-
         <!-- Google Analytics script -->
         <script>
             (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -21,6 +13,17 @@
             ga('create', 'UA-56922748-1', 'auto');
             ga('send', 'pageview');
         </script>
+
+        <!-- Interact.js library -->
+        <script type="text/javascript" src="js/interact.min.js"></script>
+
+        <!-- RTCMultiConnection script -->
+        <script type="text/javascript" src="js/RTCMultiConnection.js"></script>
+        <!-- Firebase script -->
+        <script type="text/javascript" src="https://cdn.firebase.com/js/client/2.0.3/firebase.js"></script>
+
+        <!-- Stylesheet -->
+        <link rel="stylesheet" type="text/css" href="css/main.css"></link>
 
     </head>
     <body>
@@ -41,7 +44,7 @@
         <input type="button" id="start-audio" value="Attach Audio Stream">
         <br>
         <br>
-        <div id="text-chat-output"></div>
+        <div id="text-chat-output" class="draggable"></div>
         <br>
         <div><input id="text-chat-input" placeholder="Send a message..."/></div>
     </body>
