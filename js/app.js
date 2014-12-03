@@ -289,17 +289,13 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
 
         //
         if(e.type == "local") {
-            var localVideoStream = document.createElement("VIDEO");
-
-            localVideoStream.src = e.blobURL;
+            var localVideoStream  = e.mediaElement;
             localVideoStream.autoplay = true;
             localVideoStream.id = "local-video";
 
             document.getElementById("media-container").appendChild(localVideoStream);
         } else {
-            var remoteVideoStream = document.createElement("VIDEO");
-
-            remoteVideoStream.src = e.blobURL;
+            var remoteVideoStream =  e.mediaElement;
             remoteVideoStream.autoplay = true;
             remoteVideoStream.id = "remote-video";
 
@@ -414,6 +410,9 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
         // Add the chat message to the output box
         var chatOutput = document.getElementById("text-chat-output");
         chatOutput.innerHTML += "You: " + (chatInputBox.value).replace(/[<>]/g, "") + "<br>";
+
+        // Scroll to bottom of textbox
+        chatOutput.scrollTop = chatOutput.scrollHeight;
 
         // Reset the chat input box
         chatInputBox.value = "";
