@@ -523,8 +523,7 @@ var currentUserConnections = [];
 // Start interact.js stuff
 // --------------------------------------------------------
 
-// Target elements with the "draggable" class
-interact('.draggable')
+interact('#text-chat-output')
     .draggable({
         // Allow dragging of multple elements at the same time
         max: 1,
@@ -557,32 +556,7 @@ interact('.draggable')
         drag: "parent",
         endOnly: false,
         elementRect: {top: 0, left: 0, bottom: 1, right: 1}
-    }) // end restrict()
-    // Set the element as resizable
-    .resizable({
-        // Call this on dragmove start
-        onstart: function (event) {},
-        // Call this on dragmove event
-        onmove : function (event) {
-            var target = event.target;
-            // add the change in coords to the previous width of the target element
-            var newWidth  = parseFloat(target.style.width ) + event.dx;
-            var newHeight = parseFloat(target.style.height) + event.dy;
-
-            // update the element's style
-            target.style.width  = newWidth + 'px';
-            target.style.height = newHeight + 'px';
-        },
-        // Call his on dragmove end
-        onend : function (event) {},
-
-        axis : 'xy', // default is 'xy',
-
-        // limit multiple resizes.
-        // See the explanation in @Interactable.draggable example
-        max: 1,
-        maxPerElement: 1
-    }); // end resizable()
+    }); // end restrict()
 
 // Allow more than one interaction at a time
 interact.maxInteractions(Infinity);

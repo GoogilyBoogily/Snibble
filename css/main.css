@@ -21,7 +21,7 @@ video#remote-video {
 
 div#text-chat-output {
     height: 75px;
-    width: auto;
+    width: 700px;
     overflow: auto;
     border-style: solid;
     border-color: black;
