@@ -50,16 +50,6 @@ function GenerateRoomName(localID, remoteID) {
     return roomName;
 } // end GenerateRoomName()
 
-// Checking if the user is already connected to the user passed in as the parameter
-function IsCurrentlyConnected(userIDToConnectTo) {
-    for (var i = 0; i < currentUserConnections.length; i++) {
-        if (typeof currentUserConnections[i].channel == userIDToConnectTo) {
-            return {"connected": true, "index": i};
-        } // end if
-    } // end for
-    return {"connected": false, "index": -1};
-} // end IsCurrentlyConnected()
-
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
     // Check if we're already connected to the user we want to connect to
@@ -94,6 +84,16 @@ function ConnectToUser(userIDToConnectTo) {
         return;
     } // end if/else
 } // end ConnectToUser()
+
+// Checking if the user is already connected to the user passed in as the parameter
+function IsCurrentlyConnected(userIDToConnectTo) {
+    for (var i = 0; i < currentUserConnections.length; i++) {
+        if (typeof currentUserConnections[i].channel == userIDToConnectTo) {
+            return {"connected": true, "index": i};
+        } // end if
+    } // end for
+    return {"connected": false, "index": -1};
+} // end IsCurrentlyConnected()
 
 // Create and return the current user's home connection
 function CreateHomeConnection() {
