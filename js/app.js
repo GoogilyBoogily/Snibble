@@ -62,6 +62,13 @@ function ConnectToUser(userIDToConnectTo) {
 
     // Create new connection with the randomly generated channel ID
     currentUserConnections[newConIndex] = CreateNewConnection(randomChannelID);
+    // Fired when someone has connected to us
+    currentUserConnections[newConIndex].onconnected = function(event) {
+        console.log("onconnected() event fired");
+        console.log(event);
+
+        alert("Connected to " + event.uerid);
+    };
     currentUserConnections[newConIndex].open();
 
     // TODO: Remove this connection when we don't need it anymore
@@ -177,7 +184,13 @@ function CreateHomeConnection() {
         // Create the connection for the channel to actually do stuff in
         var newConIndex = currentUserConnections.length;
 
-        currentUserConnections[newConIndex] = CreateNewConnection(request.extra, false);
+        currentUserConnections[newConIndex] = CreateNewConnection(request.extra);
+        currentUserConnections[newConIndex].onconnected = function(event) {
+            console.log("onconnected() event fired");
+            console.log(event);
+
+            alert("Connected to " + event.uerid);
+        };
         currentUserConnections[newConIndex].connect();
     };
 
@@ -343,6 +356,14 @@ function CreateNewConnection(connectingToUserID) {
     connection.bandwidth.screen = 300;
     */
 
+
+    newConnection.onstatechange  = function (state) {
+        // state.userid == 'target-userid' || 'browser'
+        // state.extra  == 'target-user-extra-data' || {}
+        // state.name  == 'short name'
+        // state.reason == 'longer description'
+        console.log(state);
+    };
 
     return newConnection;
 } // end CreateNewConnection()
