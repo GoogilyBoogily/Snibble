@@ -465,14 +465,6 @@ document.getElementById("connect-to-user").onclick = function() {
 // Begin actually running
 //
 
-// Check for Web Worker support
-if (typeof(Worker) !== undefined) {
-    // Yes! Web worker support!
-    // Some code.....
-} else {
-    // No Web Worker support..
-} // end if/else
-
 // Init current user ID var
 var currentUserID;
 
@@ -497,6 +489,7 @@ if (typeof (Storage) !== undefined) {
         localStorage.setItem("currentUserID", currentUserID);
     } // end if/else
     */
+
     // Generate the new userID
     currentUserID = GenerateUserID();
     console.log("Current userID is: " + currentUserID);
