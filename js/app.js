@@ -40,60 +40,41 @@ function GenerateUserID() {
     return text;
 } // end GenerateUserID()
 
-// Generate and return a room name based on the userIDs
+// Generate and return a room name
+// TODO: Make this not basically the same as generating the User ID
 function GenerateRoomName(localID, remoteID) {
     var roomName = "";
+    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    // Just concat the userIDs together...
-    roomName = localID + remoteID;
+    for(var i = 0; i < 12; i++) {
+        roomName += charSet.charAt(Math.floor(Math.random() * charSet.length));
+    } // end for
 
     return roomName;
 } // end GenerateRoomName()
 
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
-    // Check if we're already connected to the user we want to connect to
-    if (!IsCurrentlyConnected(userIDToConnectTo).connected) {
-        //--------
-        // TODO: Connect to the user we want to connect to by connecting to their channel, and use our userID
-        //       as the sessionid. This should work perfectly for a two user connection, but breaks down when
-        //         adding a third user.
-        //         A way to make this work is by simply checking where we're connected to that user, and send
-        //         a message through a chat that way.
-        //--------
+    var randomChannelID = GenerateRoomName();
 
-        // Add a new connection onto the current user's connection array
-        var newConIndex = currentUserConnections.length;
+    // Add a new connection onto the current user's connection array
+    var newConIndex = currentUserConnections.length;
 
-        // TODO: Remove this connection after we are sure the user we're trying to connect to enters the other channel
-        currentUserConnections[newConIndex] = CreateNewConnection(userIDToConnectTo, true);
-        currentUserConnections[newConIndex].connect(userIDToConnectTo);
+    // Create new connection with the randomly generated channel ID
+    currentUserConnections[newConIndex] = CreateNewConnection(randomChannelID);
+    currentUserConnections[newConIndex].open();
 
-
-        // Create the connection for the actual room
-        var newConIndex = currentUserConnections.length;
-
-        currentUserConnections[newConIndex] = CreateNewConnection(GenerateRoomName(currentUserID, userIDToConnectTo), false);
-        currentUserConnections[newConIndex].open();
+    // TODO: Remove this connection when we don't need it anymore
+    // Connect to the user and tell them what room to join
+    currentUserConnections[newConIndex + 1] = CreateNewConnection(userIDToConnectTo);
+    // Used to tell the user what room they should connect to!
+    currentUserConnections[newConIndex + 1].extra = randomChannelID;
+    currentUserConnections[newConIndex + 1].connect(userIDToConnectTo);
 
 
-        console.log("Opened connection to new room");
-        console.log(currentUserConnections[newConIndex]);
-    } else {
-        // Already connected to the user we want to connect to
-        return;
-    } // end if/else
+    console.log("Opened connection to new room");
+    console.log(currentUserConnections[newConIndex + 1]);
 } // end ConnectToUser()
-
-// Checking if the user is already connected to the user passed in as the parameter
-function IsCurrentlyConnected(userIDToConnectTo) {
-    for (var i = 0; i < currentUserConnections.length; i++) {
-        if (typeof currentUserConnections[i].channel == userIDToConnectTo) {
-            return {"connected": true, "index": i};
-        } // end if
-    } // end for
-    return {"connected": false, "index": -1};
-} // end IsCurrentlyConnected()
 
 // Create and return the current user's home connection
 function CreateHomeConnection() {
@@ -179,12 +160,27 @@ function CreateHomeConnection() {
     };
 
     newConnection.onmessage = function(message) {
-         // Create the connection for the channel to actually do stuff in
+
+    };
+
+    // Fired when a new user asks to connect to us
+    newConnection.onRequest = function (request) {
+        console.log(request);
+
+        // Accept the newly got request
+        //newConnection.accept(request);
+
+        // TODO: Make this a choice.
+        // Instead of accepting the request, reject it, grab the extra data from it, and join that room
+        newConnection.reject(request);
+
+        // Create the connection for the channel to actually do stuff in
         var newConIndex = currentUserConnections.length;
 
-        currentUserConnections[newConIndex] = CreateNewConnection(message.data, false);
+        currentUserConnections[newConIndex] = CreateNewConnection(request.extra, false);
         currentUserConnections[newConIndex].connect();
     };
+
 
     newConnection.session = {
         data: true
@@ -197,7 +193,7 @@ function CreateHomeConnection() {
 
 // Function for creating new connections
 // Create and return a connection for connecting to someone else's local connection
-function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
+function CreateNewConnection(connectingToUserID) {
     var newConnection = new RTCMultiConnection(connectingToUserID);
 
     // Set the current user's userID to their unique userID
@@ -272,13 +268,6 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
 
     // When the new connection opens
     newConnection.onopen = function(e) {
-        if(connectingToUsersHome) {
-            // Send a message to the connection to tell the user which room we want them to join
-            newConnection.send(GenerateRoomName(currentUserID, connectingToUserID));
-
-            // Remove the connection we have to the user's home connection, and shift the place of the connection we want
-            currentUserConnections[currentUserConnections.length - 2] = currentUserConnections.pop();
-        } // end if
 
     } // end onopen()
 
@@ -353,6 +342,7 @@ function CreateNewConnection(connectingToUserID, connectingToUsersHome) {
     connection.bandwidth.data  = 1638400;
     connection.bandwidth.screen = 300;
     */
+
 
     return newConnection;
 } // end CreateNewConnection()
@@ -471,6 +461,9 @@ if (typeof (Storage) !== undefined) {
     var storedCurrentUserID = localStorage.getItem("currentUserID");
     // If storedCurrentUserID isn't null, set currentUserID to its value
     //   Else generate and store a currentUserID
+
+    // TODO: Uncomment this when we're not debugging
+    /*
     if (storedCurrentUserID !== null) {
         // Snag the currentUserID from the stored version
         currentUserID = storedCurrentUserID;
@@ -482,6 +475,13 @@ if (typeof (Storage) !== undefined) {
         // Store the newly generated userID in localstorage
         localStorage.setItem("currentUserID", currentUserID);
     } // end if/else
+    */
+    // Generate the new userID
+    currentUserID = GenerateUserID();
+    console.log("Current userID is: " + currentUserID);
+
+
+
 
     // Place the currentUserID into the title bar so the user knows who they are
     document.getElementById('userID').innerHTML += currentUserID;
