@@ -67,7 +67,7 @@ function ConnectToUser(userIDToConnectTo) {
         console.log("onconnected() event fired");
         console.log(event);
 
-        alert("Connected to " + event.uerid);
+        alert("Connected to " + event.userid);
     };
     currentUserConnections[newConIndex].open();
 
@@ -189,7 +189,7 @@ function CreateHomeConnection() {
             console.log("onconnected() event fired");
             console.log(event);
 
-            alert("Connected to " + event.uerid);
+            alert("Connected to " + event.userid);
         };
         currentUserConnections[newConIndex].connect();
     };
