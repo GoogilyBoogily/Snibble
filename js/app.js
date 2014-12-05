@@ -106,7 +106,7 @@ function CreateHomeConnection() {
         // session.sessionid
         // session.extra
         // session.session i.e. {audio,video,screen,data}
-        console.log("OnNewSession fired!");
+        console.log("OnNewSession() fired!");
         console.log(session);
 
         session.join();
@@ -132,7 +132,7 @@ function CreateHomeConnection() {
 
         currentUserConnections[newConIndex] = CreateNewConnection(request.extra);
         currentUserConnections[newConIndex].onconnected = function(event) {
-            console.log("onconnected() event fired");
+            console.log("onconnected() fired");
             console.log(event);
 
             toastr.success("Connected to " + event.userid);
@@ -140,6 +140,14 @@ function CreateHomeConnection() {
         currentUserConnections[newConIndex].connect();
     };
 
+    newConnection.onstatechange  = function (state) {
+        // state.userid == 'target-userid' || 'browser'
+        // state.extra  == 'target-user-extra-data' || {}
+        // state.name  == 'short name'
+        // state.reason == 'longer description'
+        console.log("onstatechange() fired!");
+        console.log(state);
+    };
 
     newConnection.session = {
         data: true
@@ -222,7 +230,7 @@ function CreateNewConnection(connectingToUserID) {
         // session.sessionid
         // session.extra
         // session.session i.e. {audio,video,screen,data}
-        console.log("OnNewSession fired!");
+        console.log("OnNewSession() fired!");
         console.log(session);
 
         session.join();
@@ -297,6 +305,7 @@ function CreateNewConnection(connectingToUserID) {
         // state.extra  == 'target-user-extra-data' || {}
         // state.name  == 'short name'
         // state.reason == 'longer description'
+        console.log("onstatechange() fired!");
         console.log(state);
     };
 
