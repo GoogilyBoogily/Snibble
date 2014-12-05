@@ -40,6 +40,20 @@ function GenerateRandomString(lengthOfString) {
     return text;
 } // end GenerateUserID()
 
+// Horribly named function attempting to mitigate echo in calls
+function AfterEach(setTimeoutInteval, numberOfTimes, callback, startedTimes) {
+    startedTimes = (startedTimes || 0) + 1;
+
+    if(startedTimes >= numberOfTimes) {
+        return;
+    } // end if
+
+    setTimeout(function() {
+        callback();
+        AfterEach(setTimeoutInteval, numberOfTimes, callback, startedTimes);
+    }, setTimeoutInteval);
+} // end AfterEach()
+
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
     var randomChannelID = GenerateRandomString(12);
@@ -316,6 +330,22 @@ function CreateNewConnection(connectingToUserID) {
 
     newConnection.session = {
         data: true
+    };
+
+    newConnection.onunmute = function(event) {
+        // event.isAudio == audio-only-stream
+        // event.audio == has audio tracks
+
+        // If it is audio being muted
+        if (event.isAudio || event.session.audio) {
+            // set volume=0
+            event.mediaElement.volume = 0;
+
+            // steadily increase volume
+            afterEach(200, 5, function() {
+                event.mediaElement.volume += .20;
+            });
+        } // end if
     };
 
     newConnection.onstatechange  = function (state) {
