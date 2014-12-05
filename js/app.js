@@ -198,7 +198,9 @@ function CreateHomeConnection() {
     newConnection.session = {
         data: true
     };
+
     newConnection.userid = currentUserID;
+
     newConnection.open();
 
     return newConnection;
@@ -312,18 +314,6 @@ function CreateNewConnection(connectingToUserID) {
         e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
 
-    /*
-        Commenting out prerecorded media stuff because it don't work
-    newConnection.onMediaFile = function(e) {
-        console.log(e);
-        // e.mediaElement (it is video-element)
-        // e.userid
-        console.log(newConnection.preRecordedMedias);
-
-        document.body.appendChild(e.mediaElement);
-    };
-    */
-
     newConnection.onmessage = function(message) {
         console.log(message);
 
@@ -338,24 +328,6 @@ function CreateNewConnection(connectingToUserID) {
     newConnection.session = {
         data: true
     };
-
-    // Turn off bandwidth (Dunno what this does...)
-    newConnection.bandwidth = {};
-    /*
-    connection.bandwidth = {
-        audio: 50,
-        video: 256,
-        data: 1638400,
-        screen: 300      // 300kbps
-    };
-
-    // or change them individually
-    connection.bandwidth.audio = 80;
-    connection.bandwidth.video = 2048;
-    connection.bandwidth.data  = 1638400;
-    connection.bandwidth.screen = 300;
-    */
-
 
     newConnection.onstatechange  = function (state) {
         // state.userid == 'target-userid' || 'browser'
@@ -430,13 +402,6 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
     } // end if
 };
 
-/*
-    More prerecorded media stuff
-document.getElementById("webm-file").onchange = function() {
-    currentUserConnections[0].shareMediaFile(this.files[0]);
-};
-*/
-
 // Connect to another user on button click!
 document.getElementById("connect-to-user").onclick = function() {
     var userIDInput = document.getElementById('userID-input');
@@ -470,13 +435,12 @@ var currentUserID;
 
 // Check for localstorage support!
 if (typeof (Storage) !== undefined) {
+    // TODO: Uncomment this when we're not debugging
+    /*
     // Attempt to get the locally stored currentUserID
     var storedCurrentUserID = localStorage.getItem("currentUserID");
     // If storedCurrentUserID isn't null, set currentUserID to its value
     //   Else generate and store a currentUserID
-
-    // TODO: Uncomment this when we're not debugging
-    /*
     if (storedCurrentUserID !== null) {
         // Snag the currentUserID from the stored version
         currentUserID = storedCurrentUserID;
@@ -495,29 +459,8 @@ if (typeof (Storage) !== undefined) {
     console.log("Current userID is: " + currentUserID);
 
 
-
-
     // Place the currentUserID into the title bar so the user knows who they are
     document.getElementById('userID').innerHTML += currentUserID;
-
-
-    // Attempt to get the locally stored userConnectionHistory
-    var userConnectionHistory = localStorage.getItem("userConnectionHistory");
-    // Check if userConnectionHistory is null, if not, then parse it!
-    if (userConnectionHistory !== null) {
-        userConnectionHistory = JSON.parse(userConnectionHistory);
-
-        // Set contact list to the connection history
-        //contactList.data = userConnectionHistory;
-    }// end if
-
-
-    // Attempt to get the locally stored userChatLog
-    var userChatLog = localStorage.getItem("userChatLog");
-    // Check if userConnectionHistory is null, if not, then parse it!
-    if (userChatLog !== null) {
-        userChatLog = JSON.parse(userChatLog);
-    }// end if
 
 } else {
     console.log("No localstorage support... :(");
