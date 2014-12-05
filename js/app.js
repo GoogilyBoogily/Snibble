@@ -15,7 +15,7 @@ function ConnectToUser(userIDToConnectTo) {
         toastr.success("Connected to " + event.userid);
     };
     // Open and capture user media when another user connects
-    currentUserConnections[newConIndex].open(captureUserMediaOnDemand: true);
+    currentUserConnections[newConIndex].open(captureUserMediaOnDemand = true);
 
     // TODO: Remove this connection when we don't need it anymore
     // Connect to the user and tell them what room to join
@@ -148,7 +148,7 @@ function CreateHomeConnection() {
     newConnection.userid = currentUserID;
 
     // Open and capture user media when another user connects
-    newConnection.open(captureUserMediaOnDemand: true);
+    newConnection.open(captureUserMediaOnDemand = true);
 
     return newConnection;
 } // end CreateHomeConnection()
