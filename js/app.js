@@ -28,6 +28,8 @@ function GetDateTime() {
 
 // Generate a random string with length as the param
 function GenerateRandomString(lengthOfString) {
+    // TODO: Add error handling for if the length isn't given or is negative
+
     var text = "";
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -54,7 +56,8 @@ function ConnectToUser(userIDToConnectTo) {
 
         toastr.success("Connected to " + event.userid);
     };
-    currentUserConnections[newConIndex].open();
+    // Open and capture user media when another user connects
+    currentUserConnections[newConIndex].open(captureUserMediaOnDemand: true);
 
     // TODO: Remove this connection when we don't need it anymore
     // Connect to the user and tell them what room to join
@@ -186,7 +189,8 @@ function CreateHomeConnection() {
 
     newConnection.userid = currentUserID;
 
-    newConnection.open();
+    // Open and capture user media when another user connects
+    newConnection.open(captureUserMediaOnDemand: true);
 
     return newConnection;
 } // end CreateHomeConnection()
@@ -419,7 +423,7 @@ document.getElementById("connect-to-user").onclick = function() {
 var currentUserID;
 
 // Check for localstorage support!
-if (typeof (Storage) !== undefined) {
+if(typeof (Storage) !== undefined) {
     // TODO: Uncomment this when we're not debugging
     /*
     // Attempt to get the locally stored currentUserID
@@ -449,6 +453,7 @@ if (typeof (Storage) !== undefined) {
 
 } else {
     console.log("No localstorage support... :(");
+    console.log("Basically nothing is going to work. Good luck.");
 } // end if/else
 
 // Create the current user's home connection
