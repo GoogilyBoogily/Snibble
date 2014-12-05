@@ -540,6 +540,10 @@ console.log(homeConnection);
 var currentUserConnections = [];
 
 
+// Variable holding connection state
+var connectionState = "Not connected";
+
+
 // --------------------------------------------------------
 // Start interact.js stuff
 // --------------------------------------------------------
