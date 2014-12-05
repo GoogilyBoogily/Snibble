@@ -1,7 +1,7 @@
 function GetDateTime() {
     var now     = new Date();
     var year    = now.getFullYear();
-    var month   = now.getMonth()+1;
+    var month   = now.getMonth() + 1;
     var day     = now.getDate();
     var hour    = now.getHours();
     var minute  = now.getMinutes();
@@ -26,36 +26,21 @@ function GetDateTime() {
     return dateTime;
 } // end GetDateTime()
 
-// Function for generating new userIDs
-function GenerateUserID() {
+// Generate a random string with length as the param
+function GenerateRandomString(lengthOfString) {
     var text = "";
     var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-    // TODO: Maybe? Add in checking for if the userID we want to generate is already taken
-
-    for(var i = 0; i < 6; i++) {
+    for(var i = 0; i < lengthOfString; i++) {
         text += charSet.charAt(Math.floor(Math.random() * charSet.length));
     } // end for
 
     return text;
 } // end GenerateUserID()
 
-// Generate and return a room name
-// TODO: Make this not basically the same as generating the User ID
-function GenerateRoomName(localID, remoteID) {
-    var roomName = "";
-    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-    for(var i = 0; i < 12; i++) {
-        roomName += charSet.charAt(Math.floor(Math.random() * charSet.length));
-    } // end for
-
-    return roomName;
-} // end GenerateRoomName()
-
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
-    var randomChannelID = GenerateRoomName();
+    var randomChannelID = GenerateRandomString(12);
 
     // Add a new connection onto the current user's connection array
     var newConIndex = currentUserConnections.length;
@@ -106,7 +91,7 @@ function CreateHomeConnection() {
         {
             url: 'stun:stun4.l.google.com:19302'
                       }];
-    // Set STUN servers!
+    // Set ICE servers!
     newConnection.iceServers = iceServers;
 
     // When the new connection opens
@@ -230,7 +215,7 @@ function CreateNewConnection(connectingToUserID) {
         {
             url: 'stun:stun4.l.google.com:19302'
                       }];
-    // Set STUN servers!
+    // Set ICE servers!
     newConnection.iceServers = iceServers;
 
     //
@@ -455,7 +440,7 @@ if (typeof (Storage) !== undefined) {
     */
 
     // Generate the new userID
-    currentUserID = GenerateUserID();
+    currentUserID = GenerateRandomString(6);
     console.log("Current userID is: " + currentUserID);
 
 
@@ -474,8 +459,3 @@ console.log(homeConnection);
 
 // Make an array for all of current user's connections
 var currentUserConnections = [];
-
-
-// Variable holding connection state
-var connectionState = "Not connected";
-
