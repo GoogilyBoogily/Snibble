@@ -1,27 +1,20 @@
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
-    var randomChannelID = GenerateRandomString(12);
+    var generatedChannelID = GenerateRandomString(12);
 
     // Add a new connection onto the current user's connection array
     var newConIndex = currentUserConnections.length;
 
     // Create new connection with the randomly generated channel ID
-    currentUserConnections[newConIndex] = CreateNewConnection(randomChannelID);
-    // Fired when someone has connected to us
-    currentUserConnections[newConIndex].onconnected = function(event) {
-        console.log("onconnected() event fired");
-        console.log(event);
+    currentUserConnections[newConIndex] = CreateUserConnection(generatedChannelID);
 
-        toastr.success("Connected to " + event.userid);
-    };
     // Open and capture user media when another user connects
     currentUserConnections[newConIndex].open(captureUserMediaOnDemand = true);
 
     // TODO: Remove this connection when we don't need it anymore
     // Connect to the user and tell them what room to join
-    currentUserConnections[newConIndex + 1] = CreateNewConnection(userIDToConnectTo);
-    // Used to tell the user what room they should connect to!
-    currentUserConnections[newConIndex + 1].extra = randomChannelID;
+    currentUserConnections[newConIndex + 1] = CreateIntermediateConnection(userIDToConnectTo, generatedChannelID);
+    // Go and connect to the user!
     currentUserConnections[newConIndex + 1].connect(userIDToConnectTo);
 
 
@@ -29,12 +22,12 @@ function ConnectToUser(userIDToConnectTo) {
     console.log(currentUserConnections[newConIndex + 1]);
 } // end ConnectToUser()
 
-// Create and return the current user's home connection
-function CreateHomeConnection() {
-    var newConnection = new RTCMultiConnection(currentUserID);
-
-    // Set the current user's userID to their unique userID
-    newConnection.userid = currentUserID;
+// -------------------------------------------------
+// Create a general connection object and return it
+// -------------------------------------------------
+function CreateDefaultConnection() {
+    // Create a new RTCMultiConnection
+    var newConnection = new RTCMultiConnection();
 
     // Create the list for public STUN servers
     var iceServers = [{
@@ -52,21 +45,13 @@ function CreateHomeConnection() {
         {
             url: 'stun:stun4.l.google.com:19302'
                       }];
-    // Set ICE servers!
+
+    // Set the ICE servers!
     newConnection.iceServers = iceServers;
 
-    // When the new connection opens
-    newConnection.onopen = function(e) {
-        // e.userid
-        // e.extra
-
-        console.log(e);
-        console.log(newConnection);
-    } // end onopen()
-
-    //
+    // -----------------
     // Signalling stuff
-    //
+    // -----------------
     var channels = {};
     var firebase = new Firebase("https://webrtcantiskype.firebaseio.com");
 
@@ -100,37 +85,86 @@ function CreateHomeConnection() {
             channel: channel
         };
     };
+    // ---------------------
+    // end Signalling stuff
+    // ---------------------
 
+
+    // Fires when the connection opens
+    newConnection.onopen = function(e) {
+        console.log(e);
+        console.log(newConnection);
+    }; // end onopen()
+
+    // Fires when the someone tries to join the room we're in
     newConnection.onNewSession = function(session) {
-        // session.userid
-        // session.sessionid
-        // session.extra
-        // session.session i.e. {audio,video,screen,data}
         console.log("OnNewSession() fired!");
         console.log(session);
 
         session.join();
     };
 
+    // Fires when the connection recieves a message
     newConnection.onmessage = function(message) {
-
+        console.log("onmessage() fired!");
+        console.log(message);
     };
 
-    // Fired when a new user asks to connect to us
+    // Fires when a new user asks to connect
     newConnection.onRequest = function (request) {
+        console.log("onRequest() fired!");
         console.log(request);
 
-        // Accept the newly got request
-        //newConnection.accept(request);
+
+        newConnection.accept(request);
+    };
+
+    // Fires every time the connection state changes
+    newConnection.onstatechange  = function (state) {
+        console.log("onstatechange() fired!");
+        console.log(state);
+    };
+
+    // Set the session as data only
+    newConnection.session = {
+        data: true
+    };
+
+     // Set the current user's userID to their unique userID
+    newConnection.userid = currentUserID;
+
+    return newConnection;
+} // end Connection()
+
+// ----------------------------------------------------------------------------------------
+// Create a default connection and modify it so it functions as the user's home connection
+// ----------------------------------------------------------------------------------------
+function CreateHomeConnection() {
+    var newHomeConnection = CreateDefaultConnection();
+
+    // Modify the channel to the user's current ID
+    newHomeConnection.channel = currentUserID;
+
+    // Modify the session name to the user's current ID
+    newHomeConnection.sessionid = currentUserID;
+
+    // Fired when a new user asks to connect to us
+    newHomeConnection.onRequest = function (request) {
+        console.log("onRequest() fired!");
+        console.log(request);
+
 
         // TODO: Make this a choice.
         // Instead of accepting the request, reject it, grab the extra data from it, and join that room
-        newConnection.reject(request);
+        newHomeConnection.reject(request);
+        //newConnection.accept(request);
 
         // Create the connection for the channel to actually do stuff in
         var newConIndex = currentUserConnections.length;
 
-        currentUserConnections[newConIndex] = CreateNewConnection(request.extra);
+
+        // TODO: THIS PART
+        currentUserConnections[newConIndex] = CreateUserConnection(request.extra);
         currentUserConnections[newConIndex].onconnected = function(event) {
             console.log("onconnected() fired");
             console.log(event);
@@ -138,138 +172,83 @@ function CreateHomeConnection() {
             toastr.success("Connected to " + event.userid);
         };
         currentUserConnections[newConIndex].connect();
-    };
+    }; // end onRequest()
 
-    newConnection.onstatechange  = function (state) {
-        // state.userid == 'target-userid' || 'browser'
-        // state.extra  == 'target-user-extra-data' || {}
-        // state.name  == 'short name'
-        // state.reason == 'longer description'
-        console.log("onstatechange() fired!");
-        console.log(state);
-    };
+    // Refresh the connection to apply the changes
+    //newHomeConnection.refresh();
 
-    newConnection.session = {
-        data: true
-    };
+    // Open and set the connection to only capture user media when another user connects
+    newHomeConnection.open(captureUserMediaOnDemand = true);
 
-    newConnection.userid = currentUserID;
-
-    // Open and capture user media when another user connects
-    newConnection.open(captureUserMediaOnDemand = true);
-
-    return newConnection;
+    return newHomeConnection;
 } // end CreateHomeConnection()
 
-// Function for creating new connections
-// Create and return a connection for connecting to someone else's local connection
-function CreateNewConnection(connectingToUserID) {
-    var newConnection = new RTCMultiConnection(connectingToUserID);
 
-    // Set the current user's userID to their unique userID
-    newConnection.userid = currentUserID;
+// -----------------------------------------------------------------------------------------
+// Create a connection and connect to the home connection of the user we want to connect to
+// and invite them to a connection that we're going to make ourselves
+// -----------------------------------------------------------------------------------------
+function CreateIntermediateConnection(userIDToConnectTo, generatedChannelID) {
+    var newIntermediateConnection = CreateDefaultConnection();
 
-    // Create the list for public STUN servers
-    var iceServers = [{
-            url: 'stun:stun.l.google.com:19302'
-                      },
-        {
-            url: 'stun:stun1.l.google.com:19302'
-                      },
-        {
-            url: 'stun:stun2.l.google.com:19302'
-                      },
-        {
-            url: 'stun:stun3.l.google.com:19302'
-                      },
-        {
-            url: 'stun:stun4.l.google.com:19302'
-                      }];
-    // Set ICE servers!
-    newConnection.iceServers = iceServers;
+    // Modify the channel to the user's ID we want to connect to
+    newIntermediateConnection.channel = userIDToConnectTo;
 
-    //
-    // Signalling stuff
-    //
-    var channels = {};
-    var firebase = new Firebase("https://webrtcantiskype.firebaseio.com");
+    // Modify the session name to the user's ID we want to connect to
+    newIntermediateConnection.sessionid = userIDToConnectTo;
 
-    firebase.on("child_added", function(snapshot) {
-        var data = snapshot.val();
+    // Used to tell the user what room they should connect to!
+    newIntermediateConnection.extra = generatedChannelID;
 
-        if (data.sender == newConnection.userid) return;
+     // Refresh the connection to apply the changes
+    //newIntermediateConnection.refresh();
 
-        if (channels[data.channel]) {
-            channels[data.channel](data.message);
-        };
+    return newIntermediateConnection;
+} // end CreateIntermediateConnection()
 
-        snapshot.ref().remove();
-    });
 
-    // Overriding "openSignalingChannel" method
-    newConnection.openSignalingChannel = function(config) {
-        var channel = config.channel || this.channel;
-        channels[channel] = config.onmessage;
+// -------------------------------------------------------------------
+// Create a new connection for actually interacting with another user
+// -------------------------------------------------------------------
+function CreateUserConnection(generatedChannelID) {
+    var newUserConnection = CreateDefaultConnection();
 
-        if (config.onopen) setTimeout(config.onopen, 1000);
+    // Modify the channel to the generated name
+    newUserConnection.channel = generatedChannelID;
 
-        return {
-            send: function(message) {
-                firebase.push({
-                    sender: newConnection.userid,
-                    channel: channel,
-                    message: message
-                });
-            },
-            channel: channel
-        };
-    };
-
-    newConnection.onNewSession = function(session) {
-        // session.userid
-        // session.sessionid
-        // session.extra
-        // session.session i.e. {audio,video,screen,data}
-        console.log("OnNewSession() fired!");
-        console.log(session);
-
-        session.join();
-    };
-
-    // When the new connection opens
-    newConnection.onopen = function(e) {
-
-    } // end onopen()
-
+    // Modify the session ID to the generated name
+    newUserConnection.sessionid = generatedChannelID;
 
     // On getting local or remote media stream
-    newConnection.onstream = function(e) {
+    newUserConnection.onstream = function(e) {
         console.log(e);
 
-        //
+        // Set the stream ID to correspond with if its local or remote
         if(e.type == "local") {
             var localVideoStream  = e.mediaElement;
             localVideoStream.autoplay = true;
+            localVideoStream.controls = false;
             localVideoStream.id = "local-video";
 
             document.getElementById("media-container").appendChild(localVideoStream);
         } else {
             var remoteVideoStream =  e.mediaElement;
             remoteVideoStream.autoplay = true;
+            remoteVideoStream.controls = false;
             remoteVideoStream.id = "remote-video";
 
             document.getElementById("media-container").appendChild(remoteVideoStream);
         } // end if/else
     };
 
-    newConnection.onstreamended = function(e) {
+    newUserConnection.onstreamended = function(e) {
         console.log(e);
 
         // Remove relevant stream
         e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
 
-    newConnection.onmessage = function(message) {
+    newUserConnection.onmessage = function(message) {
         console.log(message);
 
         // Add the chat message to the output box
@@ -280,11 +259,7 @@ function CreateNewConnection(connectingToUserID) {
         chatOutput.scrollTop = chatOutput.scrollHeight;
     };
 
-    newConnection.session = {
-        data: true
-    };
-
-    newConnection.onunmute = function(event) {
+    newUserConnection.onunmute = function(event) {
         // event.isAudio == audio-only-stream
         // event.audio == has audio tracks
 
@@ -300,17 +275,19 @@ function CreateNewConnection(connectingToUserID) {
         } // end if
     };
 
-    newConnection.onstatechange  = function (state) {
-        // state.userid == 'target-userid' || 'browser'
-        // state.extra  == 'target-user-extra-data' || {}
-        // state.name  == 'short name'
-        // state.reason == 'longer description'
-        console.log("onstatechange() fired!");
-        console.log(state);
+    // Fired when someone has connected to us
+   newUserConnection.onconnected = function(event) {
+        console.log("onconnected() event fired");
+        console.log(event);
+
+        toastr.success("Connected to " + event.userid);
     };
 
-    return newConnection;
-} // end CreateNewConnection()
+    // Refresh the connection to apply the changes
+    //newUserConnection.refresh();
+
+    return newUserConnection;
+} // end CreateUserConnection()
 
 
 document.getElementById("start-video").onclick = function() {
