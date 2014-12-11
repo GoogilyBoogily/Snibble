@@ -293,12 +293,23 @@ function CreateUserConnection(generatedChannelID) {
     };
 
     // Fired when someone has connected to us
-   newUserConnection.onconnected = function(event) {
-        console.log("onconnected() event fired");
-        console.log(event);
+    newUserConnection.onconnected = function(event) {
+      console.log("onconnected() event fired");
+      console.log(event);
 
-        toastr.success("Connected to " + event.userid);
-    };
+      // If the user that fired the event isn't in our list of connected users,
+      //  add them to the array and display a notification!
+      if(newUserConnection.connctedUsers.indexOf(event.userid) == -1) {
+            var newIndex = newUserConnection.connctedUsers.length;
+            newUserConnection.connctedUsers[newIndex] = event.userid;
+
+            toastr.success("Connected to " + event.userid);
+      } // end if
+   };
+
+
+    // Array holding the users that we're connected to
+    newUserConnection.connctedUsers = [];
 
     return newUserConnection;
 } // end CreateUserConnection()
