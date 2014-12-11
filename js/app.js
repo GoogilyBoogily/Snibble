@@ -101,8 +101,8 @@ function CreateDefaultConnection() {
 
     // Fires when the connection opens
     newConnection.onopen = function(e) {
+        console.log("onOpen() fired!");
         console.log(e);
-        console.log(newConnection);
     }; // end onopen()
 
     // Fires when the someone tries to join the room we're in
