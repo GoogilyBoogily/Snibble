@@ -1,3 +1,13 @@
+/*
+--- Info header ---
+Print out the version for debugging purposes
+
+*/
+console.log("---------------");
+console.log("Snibble v0.0.01");
+console.log("---------------");
+
+
 // Attempt to connect to the user passed in as the parameter
 function ConnectToUser(userIDToConnectTo) {
     var generatedChannelID = GenerateRandomString(12);
@@ -8,10 +18,9 @@ function ConnectToUser(userIDToConnectTo) {
     // Create new connection with the randomly generated channel ID
     currentUserConnections[newConIndex] = CreateUserConnection(generatedChannelID);
 
-    // Open and capture user media when another user connects
-    currentUserConnections[newConIndex].open(captureUserMediaOnDemand = true);
+    // Open the connection
+    currentUserConnections[newConIndex].open();
 
-    // TODO: Remove this connection when we don't need it anymore
     // Connect to the user and tell them what room to join
     currentUserConnections[newConIndex + 1] = CreateIntermediateConnection(userIDToConnectTo, generatedChannelID);
     // Go and connect to the user!
@@ -174,11 +183,8 @@ function CreateHomeConnection() {
         currentUserConnections[newConIndex].connect();
     }; // end onRequest()
 
-    // Refresh the connection to apply the changes
-    //newHomeConnection.refresh();
-
-    // Open and set the connection to only capture user media when another user connects
-    newHomeConnection.open(captureUserMediaOnDemand = true);
+    // Open the connection
+    newHomeConnection.open();
 
     return newHomeConnection;
 } // end CreateHomeConnection()
@@ -200,8 +206,16 @@ function CreateIntermediateConnection(userIDToConnectTo, generatedChannelID) {
     // Used to tell the user what room they should connect to!
     newIntermediateConnection.extra = generatedChannelID;
 
-     // Refresh the connection to apply the changes
-    //newIntermediateConnection.refresh();
+    // Fired whenever the connection's state changes
+    newIntermediateConnection.onstatechange = function(state) {
+        console.log("onstatechange() fired!");
+        console.log(state);
+
+        if(state.name == "request-rejected") {
+            console.log("Popping intermediate connection off the connection array.");
+            currentUserConnections.pop();
+        } // end if
+    };
 
     return newIntermediateConnection;
 } // end CreateIntermediateConnection()
@@ -241,6 +255,7 @@ function CreateUserConnection(generatedChannelID) {
         } // end if/else
     };
 
+    //
     newUserConnection.onstreamended = function(e) {
         console.log(e);
 
@@ -248,6 +263,7 @@ function CreateUserConnection(generatedChannelID) {
         e.mediaElement.parentNode.removeChild(e.mediaElement);
     };
 
+    //
     newUserConnection.onmessage = function(message) {
         console.log(message);
 
@@ -259,6 +275,7 @@ function CreateUserConnection(generatedChannelID) {
         chatOutput.scrollTop = chatOutput.scrollHeight;
     };
 
+    //
     newUserConnection.onunmute = function(event) {
         // event.isAudio == audio-only-stream
         // event.audio == has audio tracks
@@ -282,9 +299,6 @@ function CreateUserConnection(generatedChannelID) {
 
         toastr.success("Connected to " + event.userid);
     };
-
-    // Refresh the connection to apply the changes
-    //newUserConnection.refresh();
 
     return newUserConnection;
 } // end CreateUserConnection()
