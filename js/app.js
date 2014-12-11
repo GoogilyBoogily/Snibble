@@ -1,14 +1,17 @@
 /*
---- Info header ---
-Print out the version for debugging purposes
+--- Info Header ---
+
 
 */
+
+// Print out the version for debugging purposes
 console.log("---------------");
 console.log("Snibble v0.0.01");
 console.log("---------------");
 
-
+// ----------------------------------------------------------
 // Attempt to connect to the user passed in as the parameter
+// ----------------------------------------------------------
 function ConnectToUser(userIDToConnectTo) {
     var generatedChannelID = GenerateRandomString(12);
 
@@ -30,6 +33,25 @@ function ConnectToUser(userIDToConnectTo) {
     console.log("Opened connection to new room");
     console.log(currentUserConnections[newConIndex + 1]);
 } // end ConnectToUser()
+
+// ----------------------------------------------
+// Attempt to add a user to the given connection
+// ----------------------------------------------
+function AddUserToConnection(connectionToAddUser, userIDToAdd) {
+    var channelID = connectionToAddUser.channel;
+
+    // Add a new connection onto the current user's connection array
+    var newConIndex = currentUserConnections.length;
+
+    // Connect to the user and tell them what room to join
+    currentUserConnections[newConIndex] = CreateIntermediateConnection(userIDToAdd, channelID);
+    // Go and connect to the user!
+    currentUserConnections[newConIndex].connect(userIDToAdd);
+
+
+    console.log("Went and send off the request to add the user!");
+    console.log(currentUserConnections[newConIndex]);
+} // end AddUserToConnection()
 
 // -------------------------------------------------
 // Create a general connection object and return it
@@ -99,9 +121,9 @@ function CreateDefaultConnection() {
     // ---------------------
 
 
-    // Fires when the connection opens
+    // Fires each time when data connection gets open
     newConnection.onopen = function(e) {
-        console.log("onOpen() fired!");
+        console.log("onopen() fired!");
         console.log(e);
     }; // end onopen()
 
@@ -124,7 +146,6 @@ function CreateDefaultConnection() {
         console.log("onRequest() fired!");
         console.log(request);
 
-
         newConnection.accept(request);
     };
 
@@ -133,6 +154,12 @@ function CreateDefaultConnection() {
         console.log("onstatechange() fired!");
         console.log(state);
     };
+
+    // Fired when someone has connected to us
+    newConnection.onconnected = function(event) {
+        console.log("onconnected() event fired");
+        console.log(event);
+    }; // end onconnected()
 
     // Set the session as data only
     newConnection.session = {
@@ -143,7 +170,7 @@ function CreateDefaultConnection() {
     newConnection.userid = currentUserID;
 
     return newConnection;
-} // end Connection()
+} // end CreateDefaultConnection()
 
 // ----------------------------------------------------------------------------------------
 // Create a default connection and modify it so it functions as the user's home connection
@@ -290,22 +317,22 @@ function CreateUserConnection(generatedChannelID) {
                 event.mediaElement.volume += .20;
             });
         } // end if
-    };
+    }; // end onmute()
 
-    // Fired when someone has connected to us
-    newUserConnection.onconnected = function(event) {
-      console.log("onconnected() event fired");
-      console.log(event);
+    // Fires each time when data connection gets open
+    newUserConnection.onopen = function(event) {
+        console.log("onopen() fired!");
+        console.log(event);
 
-      // If the user that fired the event isn't in our list of connected users,
-      //  add them to the array and display a notification!
-      if(newUserConnection.connctedUsers.indexOf(event.userid) == -1) {
+        // If the user that fired the event isn't in our list of connected users,
+        //  add them to the array and display a notification!
+        if(newUserConnection.connctedUsers.indexOf(event.userid) == -1) {
             var newIndex = newUserConnection.connctedUsers.length;
             newUserConnection.connctedUsers[newIndex] = event.userid;
 
             toastr.success("Connected to " + event.userid);
-      } // end if
-   };
+        } // end if
+    }; // end onopen()
 
 
     // Array holding the users that we're connected to
@@ -378,8 +405,8 @@ document.getElementById("text-chat-input").onkeydown = function(e) {
 
 // Connect to another user on button click!
 document.getElementById("connect-to-user").onclick = function() {
-    var userIDInput = document.getElementById('userID-input');
-    var userIDToConnect = userIDInput.value;
+    var userIDConnectInput = document.getElementById('userID-connect-input');
+    var userIDToConnect = userIDConnectInput.value;
 
     if(userIDToConnect !== undefined) {
         userIDToConnect = userIDToConnect.trim();
@@ -393,10 +420,35 @@ document.getElementById("connect-to-user").onclick = function() {
     } // end if
 
     // Reset the input box to empty
-    userIDInput.value = "";
+    userIDConnectInput.value = "";
 
     console.log("Attempting to connect with " + userIDToConnect);
+    // Go and connect!
     ConnectToUser(userIDToConnect);
+}; // end onclick
+
+document.getElementById("add-user").onclick = function() {
+    var userIDAddInput = document.getElementById('userID-add-input');
+    var userIDToAdd = userIDAddInput.value;
+
+    if(userIDToAdd !== undefined) {
+        userIDToAdd = userIDToAdd.trim();
+    } else {
+        userIDToAdd = "";
+    } // end if/else
+
+    // If nothing is entered into the input box, do nothing
+    if(userIDToAdd == "") {
+        return;
+    } // end if
+
+    // Reset the input box to empty
+    userIDAddInput.value = "";
+
+    console.log("Attempting to add " + userIDToAdd);
+    // Go and add the user to the connection!
+    // TODO: Change from hardcoded first connection to a dynamic one
+    AddUserToConnection(currentUserConnections[0], userIDToAdd);
 }; // end onclick
 
 
