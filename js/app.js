@@ -163,7 +163,7 @@ function CreateDefaultConnection() {
 
 	// Set the session as data only
 	newConnection.session = {
-		data: true
+		data: true,
 	};
 
 	 // Set the current user's userID to their unique userID
@@ -218,7 +218,7 @@ function CreateHomeConnection() {
 		}; // end onopen()
 
 		
-		currentUserConnections[newConIndex].connect();
+		currentUserConnections[newConIndex].join();
 	}; // end onRequest()
 
 	// Open the connection
