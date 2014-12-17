@@ -9,6 +9,102 @@ console.log("---------------");
 console.log("Snibble v0.0.01");
 console.log("---------------");
 
+
+
+/*
+//--- Auto Redial ---
+
+ connection.autoReDialOnFailure = true;
+
+//--- Logs ---
+http://www.rtcmulticonnection.org/docs/skipRTCMultiConnectionLogs/
+---
+// You can disable all logs by setting "window.skipRTCMultiConnectionLogs" to true.
+// Remember, it is "window" level object
+window.skipRTCMultiConnectionLogs = true;
+---
+http://www.rtcmulticonnection.org/docs/#log
+---
+// if you want to disable logs
+connection.log = false;
+
+connection.onlog = function(log) {
+    var div = document.createElement('div');
+    div.innerHTML = JSON.stringify(log, null, '
+');
+    document.documentElement.appendChild(div);
+};
+
+//--- Token (Random string) ---
+http://www.rtcmulticonnection.org/docs/token/
+---
+var randomString = rtcMultiConnection.token();
+rtcMultiConnection.userid = rtcMultiConnection.token();
+
+//--- ICE Protocols
+http://www.rtcmulticonnection.org/docs/#iceProtocols
+---
+connection.iceProtocols = {
+    tcp: true, // prefer using TCP-candidates
+    udp: true  // prefer using UDP-candidates
+};
+
+//--- Process SDP ---
+http://www.rtcmulticonnection.org/docs/processSdp/
+---
+// "processSdp" method can be used to modify SDP yourself!
+//   You can modify SDP to remove vp8 codecs on Firefox so that H264 are used.
+//   You can even modify SDP for application-level bandwidth and many other SDP-attributes. 
+connection.processSdp = function(sdp) {
+    sdp = remove_vp8_codecs(sdp);
+    sdp = prefer_opus (sdp);
+    sdp = use_maxaveragebitrate(sdp);
+    return sdp;
+};
+
+//--- SDP Constraints ---
+http://www.rtcmulticonnection.org/docs/sdpConstraints/
+---
+connection.sdpConstraints.mandatory = {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true,
+    VoiceActivityDetection: true,
+    IceRestart: true
+};
+
+//--- User Media stuff ---
+http://www.rtcmulticonnection.org/docs/dontCaptureUserMedia/
+---
+// ask RTCMultiConnection to don't auto-capture any media
+// added since v1.9
+connection.dontCaptureUserMedia = true;
+
+---
+http://www.rtcmulticonnection.org/docs/dontAttachStream/
+---
+// ask RTCMultiConnection to don't attach any stream to peer connection
+// it means that RTCMultiConnection will NEVER use "peer.addStream"
+// for any local media stream. So you'll be joining with no stream.
+// Remember, v1.8 and earlier versions prevents capturing of user media for this boolean
+connection.dontAttachStream = true;
+
+---
+http://www.rtcmulticonnection.org/docs/captureUserMedia/
+---
+// You can use captureUserMedia to manually capture media streams.
+// It accepts two arguments; first one is mandatory and last one is optional:
+//   1. success-callback: which is called on successfully getting user media resources.
+//   2. session: which allows you force custom media type to be captured.
+var session = {
+    audio: true
+};
+
+connection.captureUserMedia(function (mediaStream) { }, session);
+
+*/
+
+
+
 // ----------------------------------------------------------
 // Attempt to connect to the user passed in as the parameter
 // ----------------------------------------------------------
@@ -132,14 +228,14 @@ function CreateDefaultConnection() {
 		console.log("OnNewSession() fired!");
 		console.log(session);
 
-		session.join();
-	};
+		newConnection.join(session);
+	}; // end onNewSession()
 
 	// Fires when the connection recieves a message
 	newConnection.onmessage = function(message) {
 		console.log("onmessage() fired!");
 		console.log(message);
-	};
+	}; // end onmessage()
 
 	// Fires when a new user asks to connect
 	newConnection.onRequest = function (request) {
@@ -147,7 +243,7 @@ function CreateDefaultConnection() {
 		console.log(request);
 
 		newConnection.accept(request);
-	};
+	}; // end onRequest()
 
 	// Fires every time the connection state changes
 	newConnection.onstatechange  = function (state) {
@@ -157,14 +253,20 @@ function CreateDefaultConnection() {
 
 	// Fired when someone has connected to us
 	newConnection.onconnected = function(event) {
-		console.log("onconnected() event fired");
+		console.log("onconnected() fired!");
 		console.log(event);
 	}; // end onconnected()
+
+	newConnection.onMediaError = function (error) {
+		console.log("onMediaError() fired!");
+    	console.error(error);
+	}; // end onMediaError
 
 	// Set the session as data only
 	newConnection.session = {
 		data: true,
 	};
+
 
 	 // Set the current user's userID to their unique userID
 	newConnection.userid = currentUserID;
@@ -218,7 +320,7 @@ function CreateHomeConnection() {
 		}; // end onopen()
 
 		
-		currentUserConnections[newConIndex].join();
+		currentUserConnections[newConIndex].connect(request.extra);
 	}; // end onRequest()
 
 	// Open the connection
@@ -253,7 +355,7 @@ function CreateIntermediateConnection(userIDToConnectTo, generatedChannelID) {
 			console.log("Popping intermediate connection off the connection array.");
 			currentUserConnections.pop();
 		} // end if
-	};
+	}; // end onstatechange()
 
 	return newIntermediateConnection;
 } // end CreateIntermediateConnection()
@@ -273,6 +375,7 @@ function CreateUserConnection(generatedChannelID) {
 
 	// On getting local or remote media stream
 	newUserConnection.onstream = function(e) {
+		console.log("onstream() fired!");
 		console.log(e);
 
 		// Set the stream ID to correspond with if its local or remote
@@ -291,18 +394,20 @@ function CreateUserConnection(generatedChannelID) {
 
 			document.getElementById("media-container").appendChild(remoteVideoStream);
 		} // end if/else
-	};
+	}; // end onstream()
 
 	//
 	newUserConnection.onstreamended = function(e) {
+		console.log("onstreamended() fired!")
 		console.log(e);
 
 		// Remove relevant stream
 		e.mediaElement.parentNode.removeChild(e.mediaElement);
-	};
+	}; // onstreamended()
 
 	//
 	newUserConnection.onmessage = function(message) {
+		console.log("onmessage() fired!");
 		console.log(message);
 
 		// Add the chat message to the output box
@@ -311,10 +416,12 @@ function CreateUserConnection(generatedChannelID) {
 
 		// Scroll to bottom of textbox
 		chatOutput.scrollTop = chatOutput.scrollHeight;
-	};
+	}; // end onmessage()
 
 	//
 	newUserConnection.onunmute = function(event) {
+		console.log("onmute() fired!");
+		console.log(event);
 		// event.isAudio == audio-only-stream
 		// event.audio == has audio tracks
 
@@ -345,6 +452,10 @@ function CreateUserConnection(generatedChannelID) {
 		} // end if
 	}; // end onopen()
 
+	newUserConnection.onstreamid = function(event) {
+		console.log("onstreamid() fired!");
+		console.log(event);
+	}; // end onstreamid()
 
 	// Array holding the users that we're connected to
 	newUserConnection.connctedUsers = [];
@@ -359,7 +470,8 @@ document.getElementById("start-video").onclick = function() {
 	if(videoButton.value == "Attach Video Stream") {
 		currentUserConnections[0].addStream({
 			video: true,
-			audio: true
+			audio: true,
+			oneway: true
 		});
 
 		videoButton.value = "Detach Video Stream";
