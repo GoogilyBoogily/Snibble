@@ -89,6 +89,19 @@ http://www.rtcmulticonnection.org/docs/dontAttachStream/
 connection.dontAttachStream = true;
 
 ---
+http://www.rtcmulticonnection.org/docs/#captureUserMediaOnDemand
+---
+// it is "disabled" by default
+// captureUserMediaOnDemand means that "getUserMedia" API for initiator will 
+// be invoked only when required.
+// i.e. when first participant is detected.
+
+// you can enable it by setting it to "true"
+connection.open({
+    captureUserMediaOnDemand: true
+});
+
+---
 http://www.rtcmulticonnection.org/docs/captureUserMedia/
 ---
 // You can use captureUserMedia to manually capture media streams.
@@ -459,6 +472,14 @@ function CreateUserConnection(generatedChannelID) {
 
 	// Array holding the users that we're connected to
 	newUserConnection.connctedUsers = [];
+
+
+
+	newUserConnection.session = {
+	    inactive: true,
+	    audio:    true,
+	    video:    true
+	};
 
 	return newUserConnection;
 } // end CreateUserConnection()
