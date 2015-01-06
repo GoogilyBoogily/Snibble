@@ -590,11 +590,42 @@ document.getElementById("add-user").onclick = function() {
 	userIDAddInput.value = "";
 
 	console.log("Attempting to add " + userIDToAdd);
+
 	// Go and add the user to the connection!
 	// TODO: Change from hardcoded first connection to a dynamic one
 	AddUserToConnection(currentUserConnections[0], userIDToAdd);
 }; // end onclick
 
+
+// 
+// Load the DetectRTC library
+// 
+
+DetectRTC.load(function() {
+    // DetectRTC.hasWebcam (has webcam device!)
+    // DetectRTC.hasMicrophone (has microphone device!)
+    // DetectRTC.hasSpeakers (has speakers!)
+    // DetectRTC.isScreenCapturingSupported
+    // DetectRTC.isSctpDataChannelsSupported
+    // DetectRTC.isRtpDataChannelsSupported
+    // DetectRTC.isAudioContextSupported
+    // DetectRTC.isWebRTCSupported
+    // DetectRTC.isDesktopCapturingSupported
+    // DetectRTC.isMobileDevice
+    // DetectRTC.isWebSocketsSupported
+
+    // DetectRTC.osName
+
+    // DetectRTC.browser.name
+    // DetectRTC.browser.version
+    // DetectRTC.browser.isChrome
+    // DetectRTC.browser.isFirefox
+    // DetectRTC.browser.isOpera
+    // DetectRTC.browser.isIE
+    // DetectRTC.browser.isSafari
+
+    // DetectRTC.DetectLocalIPAddress(callback)
+});
 
 //
 // Begin actually running
