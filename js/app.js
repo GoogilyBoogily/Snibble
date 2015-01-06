@@ -280,6 +280,11 @@ function CreateDefaultConnection() {
 		data: true,
 	};
 
+	// 
+	newConnection.sdpConstraints.mandatory = {
+	    OfferToReceiveAudio: true,
+	    OfferToReceiveVideo: true
+	};
 
 	 // Set the current user's userID to their unique userID
 	newConnection.userid = currentUserID;
@@ -473,14 +478,6 @@ function CreateUserConnection(generatedChannelID) {
 	// Array holding the users that we're connected to
 	newUserConnection.connctedUsers = [];
 
-
-
-	newUserConnection.session = {
-	    inactive: true,
-	    audio:    true,
-	    video:    true
-	};
-
 	return newUserConnection;
 } // end CreateUserConnection()
 
@@ -613,9 +610,7 @@ DetectRTC.load(function() {
     // DetectRTC.isDesktopCapturingSupported
     // DetectRTC.isMobileDevice
     // DetectRTC.isWebSocketsSupported
-
     // DetectRTC.osName
-
     // DetectRTC.browser.name
     // DetectRTC.browser.version
     // DetectRTC.browser.isChrome
@@ -623,7 +618,6 @@ DetectRTC.load(function() {
     // DetectRTC.browser.isOpera
     // DetectRTC.browser.isIE
     // DetectRTC.browser.isSafari
-
     // DetectRTC.DetectLocalIPAddress(callback)
 });
 
