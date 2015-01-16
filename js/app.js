@@ -338,7 +338,7 @@ function CreateHomeConnection() {
 		}; // end onopen()
 
 		
-		currentUserConnections[newConIndex].connect(request.extra);
+		currentUserConnections[newConIndex].join(request.extra);
 	}; // end onRequest()
 
 	// Open the connection
@@ -488,8 +488,7 @@ document.getElementById("start-video").onclick = function() {
 	if(videoButton.value == "Attach Video Stream") {
 		currentUserConnections[0].addStream({
 			video: true,
-			audio: true,
-			oneway: true
+			audio: true
 		});
 
 		videoButton.value = "Detach Video Stream";
