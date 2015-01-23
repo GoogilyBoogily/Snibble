@@ -289,6 +289,17 @@ function CreateDefaultConnection() {
 	 // Set the current user's userID to their unique userID
 	newConnection.userid = currentUserID;
 
+
+
+	// Send a message over the connection
+	newConnection.sendMessage = function(message) {
+	    message.userid = newConnection.userid;
+	    message.extra = newConnection.extra;
+	    newConnection.sendCustomMessage(message);
+	}; // end sendMessage()
+
+
+
 	return newConnection;
 } // end CreateDefaultConnection()
 
@@ -478,6 +489,17 @@ function CreateUserConnection(generatedChannelID) {
 	// Array holding the users that we're connected to
 	newUserConnection.connctedUsers = [];
 
+
+
+	// Fires each time we recieve a "custom message" from another user
+	newUserConnection.onCustomMessage = function(message) {
+
+
+	};
+
+
+
+
 	return newUserConnection;
 } // end CreateUserConnection()
 
@@ -506,9 +528,29 @@ document.getElementById("start-audio").onclick = function() {
 	var videoButton = document.getElementById("start-audio");
 
 	if(videoButton.value == "Attach Audio Stream") {
-		currentUserConnections[0].addStream({
+
+
+
+		var session = {
 			audio: true
-		});
+		};
+
+	    currentUserConnections[0].captureUserMedia(function(stream) {
+	        var streamid = currentUserConnections[0].token();
+	        currentUserConnections[0].customStreams[streamid] = stream;
+
+	        currentUserConnections[0].sendMessage({
+	            hasMic: true,
+	            streamid: streamid,
+	            session: session
+	        });
+	    }, session);
+
+
+
+
+
+
 
 		videoButton.value = "Detach Audio Stream";
 	} else {
