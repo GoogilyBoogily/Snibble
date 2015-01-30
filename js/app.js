@@ -29,10 +29,10 @@ http://www.rtcmulticonnection.org/docs/#log
 connection.log = false;
 
 connection.onlog = function(log) {
-    var div = document.createElement('div');
-    div.innerHTML = JSON.stringify(log, null, '
+	var div = document.createElement('div');
+	div.innerHTML = JSON.stringify(log, null, '
 ');
-    document.documentElement.appendChild(div);
+	document.documentElement.appendChild(div);
 };
 
 //--- Token (Random string) ---
@@ -45,8 +45,8 @@ rtcMultiConnection.userid = rtcMultiConnection.token();
 http://www.rtcmulticonnection.org/docs/#iceProtocols
 ---
 connection.iceProtocols = {
-    tcp: true, // prefer using TCP-candidates
-    udp: true  // prefer using UDP-candidates
+	tcp: true, // prefer using TCP-candidates
+	udp: true  // prefer using UDP-candidates
 };
 
 //--- Process SDP ---
@@ -56,20 +56,20 @@ http://www.rtcmulticonnection.org/docs/processSdp/
 //   You can modify SDP to remove vp8 codecs on Firefox so that H264 are used.
 //   You can even modify SDP for application-level bandwidth and many other SDP-attributes. 
 connection.processSdp = function(sdp) {
-    sdp = remove_vp8_codecs(sdp);
-    sdp = prefer_opus (sdp);
-    sdp = use_maxaveragebitrate(sdp);
-    return sdp;
+	sdp = remove_vp8_codecs(sdp);
+	sdp = prefer_opus (sdp);
+	sdp = use_maxaveragebitrate(sdp);
+	return sdp;
 };
 
 //--- SDP Constraints ---
 http://www.rtcmulticonnection.org/docs/sdpConstraints/
 ---
 connection.sdpConstraints.mandatory = {
-    OfferToReceiveAudio: true,
-    OfferToReceiveVideo: true,
-    VoiceActivityDetection: true,
-    IceRestart: true
+	OfferToReceiveAudio: true,
+	OfferToReceiveVideo: true,
+	VoiceActivityDetection: true,
+	IceRestart: true
 };
 
 //--- User Media stuff ---
@@ -98,7 +98,7 @@ http://www.rtcmulticonnection.org/docs/#captureUserMediaOnDemand
 
 // you can enable it by setting it to "true"
 connection.open({
-    captureUserMediaOnDemand: true
+	captureUserMediaOnDemand: true
 });
 
 ---
@@ -109,7 +109,7 @@ http://www.rtcmulticonnection.org/docs/captureUserMedia/
 //   1. success-callback: which is called on successfully getting user media resources.
 //   2. session: which allows you force custom media type to be captured.
 var session = {
-    audio: true
+	audio: true
 };
 
 connection.captureUserMedia(function (mediaStream) { }, session);
@@ -272,7 +272,7 @@ function CreateDefaultConnection() {
 
 	newConnection.onMediaError = function (error) {
 		console.log("onMediaError() fired!");
-    	console.error(error);
+		console.error(error);
 	}; // end onMediaError
 
 	// Set the session as data only
@@ -282,8 +282,8 @@ function CreateDefaultConnection() {
 
 	// 
 	newConnection.sdpConstraints.mandatory = {
-	    OfferToReceiveAudio: true,
-	    OfferToReceiveVideo: true
+		OfferToReceiveAudio: true,
+		OfferToReceiveVideo: true
 	};
 
 	 // Set the current user's userID to their unique userID
@@ -293,9 +293,9 @@ function CreateDefaultConnection() {
 
 	// Send a message over the connection
 	newConnection.sendMessage = function(message) {
-	    message.userid = newConnection.userid;
-	    message.extra = newConnection.extra;
-	    newConnection.sendCustomMessage(message);
+		message.userid = newConnection.userid;
+		message.extra = newConnection.extra;
+		newConnection.sendCustomMessage(message);
 	}; // end sendMessage()
 
 
@@ -402,6 +402,9 @@ function CreateUserConnection(generatedChannelID) {
 	// Modify the session ID to the generated name
 	newUserConnection.sessionid = generatedChannelID;
 
+	// Create a var for custom streams
+	newUserConnection.customStreams = {};
+
 	// On getting local or remote media stream
 	newUserConnection.onstream = function(e) {
 		console.log("onstream() fired!");
@@ -491,13 +494,47 @@ function CreateUserConnection(generatedChannelID) {
 
 
 
+
+
 	// Fires each time we recieve a "custom message" from another user
 	newUserConnection.onCustomMessage = function(message) {
+		console.log("onCustomMessage() fired!");
 
 
-	};
+		console.log(message);
+
+		// If the message says that someone enabled their microphone
+		if(message.hasMic) {
+			console.log(message.userid + " enabled their microphone!");
 
 
+			// Set the session as one way
+			message.session.oneway = true;
+
+			// Send a message telling the peers to renegotiate
+			newUserConnection.sendMessage({
+				renegotiate: true,
+				streamid: message.streamid,
+				session: message.session
+			}); // emd sendMessage()
+		} // end if
+
+		// If the message is telling us to renegotiate
+		if(message.renegotiate) {
+			// Get the custom stream from the message's streamid
+			var customStream = newUserConnection.customStreams[message.streamid];
+
+			// If the custom stream exists
+			if(customStream) {
+				// Renegotiate the stream for the peer
+				newUserConnection.peers[message.userid].renegotiate(customStream, message.session);
+			} // end if
+		} // end if
+	}; // end onCustomMessage()
+
+
+
+	
 
 
 	return newUserConnection;
@@ -525,9 +562,9 @@ document.getElementById("start-video").onclick = function() {
 };
 
 document.getElementById("start-audio").onclick = function() {
-	var videoButton = document.getElementById("start-audio");
+	var audioButton = document.getElementById("start-audio");
 
-	if(videoButton.value == "Attach Audio Stream") {
+	if(audioButton.value == "Attach Audio Stream") {
 
 
 
@@ -535,30 +572,30 @@ document.getElementById("start-audio").onclick = function() {
 			audio: true
 		};
 
-	    currentUserConnections[0].captureUserMedia(function(stream) {
-	        var streamid = currentUserConnections[0].token();
-	        currentUserConnections[0].customStreams[streamid] = stream;
+		currentUserConnections[0].captureUserMedia(function(stream) {
+			var streamid = currentUserConnections[0].token();
+			currentUserConnections[0].customStreams[streamid] = stream;
 
-	        currentUserConnections[0].sendMessage({
-	            hasMic: true,
-	            streamid: streamid,
-	            session: session
-	        });
-	    }, session);
-
-
+			currentUserConnections[0].sendMessage({
+				hasMic: true,
+				streamid: streamid,
+				session: session
+			});
+		}, session);
 
 
 
 
 
-		videoButton.value = "Detach Audio Stream";
+
+
+		audioButton.value = "Detach Audio Stream";
 	} else {
 		currentUserConnections[0].removeStream({
 			audio: true
 		});
 
-		videoButton.value = "Attach Audio Stream";
+		audioButton.value = "Attach Audio Stream";
 	} // end else/if
 };
 
@@ -640,26 +677,26 @@ document.getElementById("add-user").onclick = function() {
 // 
 
 DetectRTC.load(function() {
-    // DetectRTC.hasWebcam (has webcam device!)
-    // DetectRTC.hasMicrophone (has microphone device!)
-    // DetectRTC.hasSpeakers (has speakers!)
-    // DetectRTC.isScreenCapturingSupported
-    // DetectRTC.isSctpDataChannelsSupported
-    // DetectRTC.isRtpDataChannelsSupported
-    // DetectRTC.isAudioContextSupported
-    // DetectRTC.isWebRTCSupported
-    // DetectRTC.isDesktopCapturingSupported
-    // DetectRTC.isMobileDevice
-    // DetectRTC.isWebSocketsSupported
-    // DetectRTC.osName
-    // DetectRTC.browser.name
-    // DetectRTC.browser.version
-    // DetectRTC.browser.isChrome
-    // DetectRTC.browser.isFirefox
-    // DetectRTC.browser.isOpera
-    // DetectRTC.browser.isIE
-    // DetectRTC.browser.isSafari
-    // DetectRTC.DetectLocalIPAddress(callback)
+	// DetectRTC.hasWebcam (has webcam device!)
+	// DetectRTC.hasMicrophone (has microphone device!)
+	// DetectRTC.hasSpeakers (has speakers!)
+	// DetectRTC.isScreenCapturingSupported
+	// DetectRTC.isSctpDataChannelsSupported
+	// DetectRTC.isRtpDataChannelsSupported
+	// DetectRTC.isAudioContextSupported
+	// DetectRTC.isWebRTCSupported
+	// DetectRTC.isDesktopCapturingSupported
+	// DetectRTC.isMobileDevice
+	// DetectRTC.isWebSocketsSupported
+	// DetectRTC.osName
+	// DetectRTC.browser.name
+	// DetectRTC.browser.version
+	// DetectRTC.browser.isChrome
+	// DetectRTC.browser.isFirefox
+	// DetectRTC.browser.isOpera
+	// DetectRTC.browser.isIE
+	// DetectRTC.browser.isSafari
+	// DetectRTC.DetectLocalIPAddress(callback)
 });
 
 //
