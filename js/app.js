@@ -504,7 +504,7 @@ function CreateUserConnection(generatedChannelID) {
 		console.log(message);
 
 		// If the message says that someone enabled their microphone
-		if(message.hasMic) {
+		if(message.turnedOnMic) {
 			console.log(message.userid + " enabled their microphone!");
 
 
@@ -518,6 +518,42 @@ function CreateUserConnection(generatedChannelID) {
 				session: message.session
 			}); // emd sendMessage()
 		} // end if
+
+
+		// If the message says that someone enabled their video
+		if(message.turnedOnVideo) {
+			console.log(message.userid + " enabled their video!");
+
+			/*
+			session = {
+				audio: true,
+				video: true
+			};
+
+			
+			newUserConnection.captureUserMedia(function(stream) {
+				newUserConnection.renegotiatedSessions[JSON.stringify(session)] = {
+					session: session,
+					stream: stream
+				};
+			
+				newUserConnection.peers[message.userid].peer.connection.addStream(stream);
+			}, session);
+			*/
+
+
+
+			// Set the session as one way
+			message.session.oneway = true;
+			
+			newUserConnection.sendMessage({
+				renegotiate: true,
+				streamid: message.streamid,
+				session: message.session
+			});
+
+		} // end if
+
 
 		// If the message is telling us to renegotiate
 		if(message.renegotiate) {
@@ -545,10 +581,33 @@ document.getElementById("start-video").onclick = function() {
 	var videoButton = document.getElementById("start-video");
 
 	if(videoButton.value == "Attach Video Stream") {
-		currentUserConnections[0].addStream({
-			video: true,
-			audio: true
-		});
+
+
+
+
+
+		console.log("Adding video stream...");
+
+		var session = {
+			audio: true,
+			video: true
+		};
+
+		currentUserConnections[0].captureUserMedia(function(stream) {
+			var streamid = currentUserConnections[0].token();
+			currentUserConnections[0].customStreams[streamid] = stream;
+
+			currentUserConnections[0].sendMessage({
+				turnedOnVideo: true,
+				streamid: streamid,
+				session: session
+			});
+		}, session);
+
+
+
+
+
 
 		videoButton.value = "Detach Video Stream";
 	} else {
@@ -567,6 +626,7 @@ document.getElementById("start-audio").onclick = function() {
 	if(audioButton.value == "Attach Audio Stream") {
 
 
+		console.log("Adding audio stream...");
 
 		var session = {
 			audio: true
@@ -577,7 +637,7 @@ document.getElementById("start-audio").onclick = function() {
 			currentUserConnections[0].customStreams[streamid] = stream;
 
 			currentUserConnections[0].sendMessage({
-				hasMic: true,
+				turnedOnMic: true,
 				streamid: streamid,
 				session: session
 			});
