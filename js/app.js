@@ -405,10 +405,27 @@ function CreateUserConnection(generatedChannelID) {
 	// Create a var for custom streams
 	newUserConnection.customStreams = {};
 
+
+
+	newUserConnection.blobURLs = {};
+
+
+
 	// On getting local or remote media stream
 	newUserConnection.onstream = function(e) {
 		console.log("onstream() fired!");
 		console.log(e);
+
+
+
+
+
+
+		newUserConnection.blobURLs[e.userid] = e.blobURL;
+
+
+
+
 
 		// Set the stream ID to correspond with if its local or remote
 		if(e.type == "local") {
@@ -426,6 +443,7 @@ function CreateUserConnection(generatedChannelID) {
 
 			document.getElementById("media-container").appendChild(remoteVideoStream);
 		} // end if/else
+
 	}; // end onstream()
 
 	//
@@ -484,6 +502,16 @@ function CreateUserConnection(generatedChannelID) {
 		} // end if
 	}; // end onopen()
 
+	// Fires each time a connection closes
+	newUserConnection.onclose = function(event) {
+		console.log("onclose() fired!");
+		console.log(event);
+
+		toastr.error(event.userid + " has disconnected.");
+	}; // end onclose()
+
+
+
 	newUserConnection.onstreamid = function(event) {
 		console.log("onstreamid() fired!");
 		console.log(event);
@@ -524,28 +552,11 @@ function CreateUserConnection(generatedChannelID) {
 		if(message.turnedOnVideo) {
 			console.log(message.userid + " enabled their video!");
 
-			/*
-			session = {
-				audio: true,
-				video: true
-			};
-
-			
-			newUserConnection.captureUserMedia(function(stream) {
-				newUserConnection.renegotiatedSessions[JSON.stringify(session)] = {
-					session: session,
-					stream: stream
-				};
-			
-				newUserConnection.peers[message.userid].peer.connection.addStream(stream);
-			}, session);
-			*/
-
 
 
 			// Set the session as one way
 			message.session.oneway = true;
-			
+
 			newUserConnection.sendMessage({
 				renegotiate: true,
 				streamid: message.streamid,
@@ -582,10 +593,6 @@ document.getElementById("start-video").onclick = function() {
 
 	if(videoButton.value == "Attach Video Stream") {
 
-
-
-
-
 		console.log("Adding video stream...");
 
 		var session = {
@@ -603,9 +610,6 @@ document.getElementById("start-video").onclick = function() {
 				session: session
 			});
 		}, session);
-
-
-
 
 
 
@@ -642,10 +646,6 @@ document.getElementById("start-audio").onclick = function() {
 				session: session
 			});
 		}, session);
-
-
-
-
 
 
 
